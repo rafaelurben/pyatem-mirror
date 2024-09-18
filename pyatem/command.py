@@ -16,7 +16,9 @@ class Command:
 
 class CutCommand(Command):
     """
-    Implementation of the `DCut` command. This is equivalent to pressing the CUT button in the UI
+    Implementation of the `DCut` command.  This initiates a cut transition.
+    It is equivalent to pressing the CUT button in the Transition Style
+    area of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -29,7 +31,7 @@ class CutCommand(Command):
 
     def __init__(self, index):
         """
-        :param index: 0-indexed M/E number to send the CUT to
+        :param index: 0-indexed M/E number for the transition
         """
         self.index = index
 
@@ -40,7 +42,9 @@ class CutCommand(Command):
 
 class AutoCommand(Command):
     """
-    Implementation of the `DAut` command. This is equivalent to pressing the AUTO button in the UI
+    Implementation of the `DAut` command.  This initiates an Auto transition.
+    It is equivalent to pressing the AUTO button in the Transition Style area
+    of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -53,7 +57,7 @@ class AutoCommand(Command):
 
     def __init__(self, index):
         """
-        :param index: 0-indexed M/E number to send the AUTO transition to
+        :param index: 0-indexed M/E number for the transition
         """
         self.index = index
 
@@ -64,8 +68,9 @@ class AutoCommand(Command):
 
 class ProgramInputCommand(Command):
     """
-    Implementation of the `CPgI` command. This is equivalent to pressing the buttons on the program bus on a control
-    panel.
+    Implementation of the `CPgI` command.  This changes the Program source.
+    It is equivalent to pressing one of the buttons in the Program arae of the
+    UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -79,8 +84,8 @@ class ProgramInputCommand(Command):
 
     def __init__(self, index, source):
         """
-        :param index: 0-indexed M/E number to control the program bus of
-        :param source: Source index to activate on the program bus
+        :param index: 0-indexed M/E number for the program bus
+        :param source: Source index to send to the program bus
         """
         self.index = index
         self.source = source
@@ -92,8 +97,9 @@ class ProgramInputCommand(Command):
 
 class PreviewInputCommand(Command):
     """
-    Implementation of the `CPvI` command. This is equivalent to pressing the buttons on the preview bus on a control
-    panel.
+    Implementation of the `CPvI` command.  This changes the Preview source.
+    It is equivalent to pressing one of the buttons in the Preview area of
+    the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -107,8 +113,8 @@ class PreviewInputCommand(Command):
 
     def __init__(self, index, source):
         """
-        :param index: 0-indexed M/E number to control the preview bus of
-        :param source: Source index to activate on the preview bus
+        :param index: 0-indexed M/E number for the preview bus
+        :param source: Source index to send to the preview bus
         """
         self.index = index
         self.source = source
@@ -120,7 +126,8 @@ class PreviewInputCommand(Command):
 
 class AuxSourceCommand(Command):
     """
-    Implementation of the `CAuS` command. This selects the source that will be sent to a specific AUX output
+    Implementation of the `CAuS` command.  This selects the source that will be
+    sent to a specific AUX output.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -147,7 +154,8 @@ class AuxSourceCommand(Command):
 
 class TransitionPositionCommand(Command):
     """
-    Implementation of the `CTPs` command. This sets the state and position for the transition T-bar control.
+    Implementation of the `CTPs` command.  This sets the position for the T-bar
+    control of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -161,8 +169,8 @@ class TransitionPositionCommand(Command):
 
     def __init__(self, index, position):
         """
-        :param index: 0-indexed M/E number to control the transition of
-        :param position: New position for the T-bar [0-10000]
+        :param index: 0-indexed M/E number for the T-bar
+        :param position: Position for the T-bar [0-10000]
         """
         self.index = index
         self.position = position
@@ -175,18 +183,22 @@ class TransitionPositionCommand(Command):
 
 class TransitionSettingsCommand(Command):
     """
-    Implementation of the `CTTp` command. This is setting the transition style for the M/E unit between the
-    Mix, Dip, Wipe, String and DVE transition style.
+    Implementation of the `CTTp` command.  This sets the transition style for
+    a M/E unit to one of Mix, Dip, Wipe, String or DVE.  It is equivalent to
+    pressing one of the top-row buttons in the Transition Style area of the
+    UI Switcher panel.
 
-    The style argument takes one of the values from the TransitionSettingsField constants:
-    TransitionSettingsField.STYLE_MXI
-    TransitionSettingsField.STYLE_DIP
-    TransitionSettingsField.STYLE_WIPE
-    TransitionSettingsField.STYLE_STING
-    TransitionSettingsField.STYLE_DVE
+    The style argument takes one of the values from the TransitionSettingsField
+    constants:
 
-    The next_transition argument is a bitfield that sets the state of the "Next Transition" buttons, the row
-    with the BKGD button.
+    - TransitionSettingsField.STYLE_MXI
+    - TransitionSettingsField.STYLE_DIP
+    - TransitionSettingsField.STYLE_WIPE
+    - TransitionSettingsField.STYLE_STING
+    - TransitionSettingsField.STYLE_DVE
+
+    The next_transition argument is a bit field that sets the state of the
+    "Next Transition" buttons, the row with the BKGD button.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -211,9 +223,9 @@ class TransitionSettingsCommand(Command):
 
     def __init__(self, index, style=None, next_transition=None):
         """
-        :param index: 0-indexed M/E number to control the preview bus of
-        :param style: Set new transition style, or None
-        :param next_transition: Set next transition active layers, or None
+        :param index: 0-indexed M/E number for the transition settings
+        :param style: Transition style
+        :param next_transition: Bit field for the next transition active layers
         """
 
         self.index = index
@@ -235,7 +247,9 @@ class TransitionSettingsCommand(Command):
 
 class TransitionPreviewCommand(Command):
     """
-    Implementation of the `CTPr` command. This sets the state of the Transition Preview function of the mixer
+    Implementation of the `CTPr` command.  This sets the state of the
+    Transition Preview function of the mixer.  It is equivalent to pressing
+    the Prev Trans button in the Transition Style area of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -249,8 +263,8 @@ class TransitionPreviewCommand(Command):
 
     def __init__(self, index, enabled):
         """
-        :param index: 0-indexed M/E number to control the preview bus of
-        :param enabled: New state of the preview function
+        :param index: 0-indexed M/E number for the the preview bus
+        :param enabled: True to enable; False to disable
         """
         self.index = index
         self.enabled = enabled
@@ -262,7 +276,9 @@ class TransitionPreviewCommand(Command):
 
 class ColorGeneratorCommand(Command):
     """
-    Implementation of the `CClV` command. This sets the color for a color generator
+    Implementation of the `CClV` command. This sets the color for a color
+    generator.  It is equivalent to adjusting the Color Generators settings
+    in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -279,9 +295,9 @@ class ColorGeneratorCommand(Command):
     def __init__(self, index, hue=None, saturation=None, luma=None):
         """
         :param index: Color generator index
-        :param hue: New Hue for the generator, or None
-        :param saturation: New Saturation for the generator, or None
-        :param luma: New Luma for the generator, or None
+        :param hue: Hue for the generator
+        :param saturation: Saturation for the generator
+        :param luma: Luma for the generator
         """
         self.index = index
         self.hue = hue
@@ -311,7 +327,9 @@ class ColorGeneratorCommand(Command):
 
 class FadeToBlackCommand(Command):
     """
-    Implementation of the `FtbA` command. This triggers the fade-to-black transition
+    Implementation of the `FtbA` command.  This triggers the fade-to-black
+    transition.  It is equivalent to pressing FTB in the Fade to Black area
+    of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -326,7 +344,7 @@ class FadeToBlackCommand(Command):
 
     def __init__(self, index):
         """
-        :param index: 0-indexed M/E number to trigger FTB on
+        :param index: 0-indexed M/E number for the transition
         """
         self.index = index
 
@@ -337,7 +355,9 @@ class FadeToBlackCommand(Command):
 
 class FadeToBlackConfigCommand(Command):
     """
-    Implementation of the `FtbC` command. This sets the duration for the fade-to-black block
+    Implementation of the `FtbC` command. This sets the duration for the
+    fade-to-black transition.  It is equivalent to adjusting the Fade to Black
+    settings in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -352,8 +372,8 @@ class FadeToBlackConfigCommand(Command):
 
     def __init__(self, index, frames):
         """
-        :param index: 0-indexed M/E number to configure FTB for
-        :param frame: Number of frames in the FTB transition
+        :param index: 0-indexed M/E number for the transition
+        :param frames: Transition duration in frames
         """
         self.index = index
         self.frames = frames
@@ -365,7 +385,9 @@ class FadeToBlackConfigCommand(Command):
 
 class CaptureStillCommand(Command):
     """
-    Implementation of the `Capt` command. This saves the current frame of the program output into the media slots
+    Implementation of the `Capt` command.  This saves the current frame of the
+    program output into the media slots.  It is equivalent to pressing
+    Capture Still in the Output menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -381,7 +403,9 @@ class CaptureStillCommand(Command):
 
 class MediaplayerSelectCommand(Command):
     """
-    Implementation of the `MPSS` command. This sets the still or clip from the media pool to load into a mediaplayer
+    Implementation of the `MPSS` command. This sets the still or clip from the
+    media pool to load into a mediaplayer.  It is equivalent to changing
+    the mediaplayer clip in the UI Media panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -430,8 +454,9 @@ class MediaplayerSelectCommand(Command):
 
 class DkeyOnairCommand(Command):
     """
-    Implementation of the `CDsL` command. This setting the "on-air" state of the downstream keyer on or off
-    panel.
+    Implementation of the `CDsL` command.  This sets the On Air state of the
+    downstream keyer panel.  It is equivalent to pressing the On Air button
+    in the DSK area of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -446,7 +471,7 @@ class DkeyOnairCommand(Command):
     def __init__(self, index, on_air):
         """
         :param index: 0-indexed DSK number to control
-        :param on_air: The new on-air state for the keyer
+        :param on_air: True for on-air; False for off
         """
         self.index = index
         self.on_air = on_air
@@ -458,8 +483,9 @@ class DkeyOnairCommand(Command):
 
 class DkeyTieCommand(Command):
     """
-    Implementation of the `CDsT` command. This setting the "tie" state of the downstream keyer on or off
-    panel.
+    Implementation of the `CDsT` command.  This sets the "tie" state of the
+    downstream keyer.  It is equivalent to pressing the Tie button in the DSK
+    area of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -474,7 +500,7 @@ class DkeyTieCommand(Command):
     def __init__(self, index, tie):
         """
         :param index: 0-indexed DSK number to control
-        :param tie: The new tie state for the keyer
+        :param tie: True for on; False for off
         """
         self.index = index
         self.tie = tie
@@ -486,8 +512,9 @@ class DkeyTieCommand(Command):
 
 class DkeyAutoCommand(Command):
     """
-    Implementation of the `DDsA` command. This triggers the auto transition of a downstream keyer
-    panel.
+    Implementation of the `DDsA` command.  This triggers the auto transition of
+    the downstream keyer.  It is equivalent to pressing the Auto button in the
+    DSK area of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -500,7 +527,7 @@ class DkeyAutoCommand(Command):
 
     def __init__(self, index):
         """
-        :param index: 0-indexed DSK number to trigger
+        :param index: 0-indexed DSK number to control
         """
         self.index = index
 
@@ -511,8 +538,9 @@ class DkeyAutoCommand(Command):
 
 class DkeyRateCommand(Command):
     """
-    Implementation of the `CDsR` command. This sets the transition rate for the downstream keyer
-    panel.
+    Implementation of the `CDsR` command. This sets the transition duration
+    for the downstream keyer.  It is equivalent to adjusting the DSK Rate of
+    the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -526,8 +554,8 @@ class DkeyRateCommand(Command):
 
     def __init__(self, index, rate):
         """
-        :param index: 0-indexed DSK number to change
-        :param rate: New rate in frames for the keyer
+        :param index: 0-indexed DSK number to control
+        :param rate: Transition duration in frames
         """
         self.index = index
         self.rate = rate
@@ -539,8 +567,9 @@ class DkeyRateCommand(Command):
 
 class DkeySetFillCommand(Command):
     """
-    Implementation of the `CDsF` command. This sets the fill source on a downstream keyer
-    panel.
+    Implementation of the `CDsF` command.  This sets the fill source on a
+    downstream keyer.  It is equivalent to adjusting the Fill Source of the
+    Downstream Key settings in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -555,7 +584,7 @@ class DkeySetFillCommand(Command):
     def __init__(self, index, source):
         """
         :param index: 0-indexed DSK number to control
-        :param source: The source index to set on the keyer
+        :param source: The fill source index for the downstream keyer
         """
         self.index = index
         self.source = source
@@ -567,8 +596,9 @@ class DkeySetFillCommand(Command):
 
 class DkeySetKeyCommand(Command):
     """
-    Implementation of the `CDsC` command. This sets the key source on a downstream keyer
-    panel.
+    Implementation of the `CDsC` command. This sets the key source on a
+    downstream keyer.  It is equivalent to adjusting the Key Source of the
+    Downstream Key settings in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -583,7 +613,7 @@ class DkeySetKeyCommand(Command):
     def __init__(self, index, source):
         """
         :param index: 0-indexed DSK number to control
-        :param source: The source index to set on the keyer
+        :param source: The key source index for downstream keyer
         """
         self.index = index
         self.source = source
@@ -595,8 +625,10 @@ class DkeySetKeyCommand(Command):
 
 class DkeyGainCommand(Command):
     """
-    Implementation of the `CDsG` command. This controls the gain, clip, premultiplied and invert settings for a
-    downstream keyer.
+    Implementation of the `CDsG` command.  This controls the gain, clip,
+    premultiplied and invert settings for a downstream keyer.  It is equivalent
+    to adjusting the Downstream Key settings in the Palettes menu of the UI
+    Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -625,10 +657,10 @@ class DkeyGainCommand(Command):
     def __init__(self, index, premultiplied=None, clip=None, gain=None, invert=None):
         """
         :param index: 0-indexed DSK number to control
-        :param premultipled: The new premultiplied state for the keyer, or None
-        :param clip: The new clip value for the keyer, or None
-        :param gain: The new gain value for the keyer, or None
-        :param invert: The new invert state for the keyer, or None
+        :param premultipled: Premultiplied state for the keyer
+        :param clip: Vlip value for the keyer
+        :param gain: Gain value for the keyer
+        :param invert: Invert state for the keyer
         """
         self.index = index
         self.premultiplied = premultiplied
@@ -657,7 +689,9 @@ class DkeyGainCommand(Command):
 
 class DkeyMaskCommand(Command):
     """
-    Implementation of the `CDsM` command. This controls the mask values for a downstream keyer.
+    Implementation of the `CDsM` command.  This controls the mask values for a
+    downstream keyer.  It is equivalent to adjusting Mask parameters in the
+    Downstream Key settings of the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -687,11 +721,11 @@ class DkeyMaskCommand(Command):
     def __init__(self, index, enabled=None, top=None, bottom=None, left=None, right=None):
         """
         :param index: 0-indexed DSK number to control
-        :param enabled: Enable or disable the mask, or None
-        :param top: The new top offset for the mask, or None
-        :param bottom: The new bottom offset for the mask, or None
-        :param left: The new left offset for the mask, or None
-        :param right: The new right offset for the mask, or None
+        :param enabled: Enable or disable the mask
+        :param top: Top offset for the mask
+        :param bottom: Bottom offset for the mask
+        :param left: Left offset for the mask
+        :param right: Right offset for the mask
         """
         self.index = index
         self.enabled = enabled
@@ -724,13 +758,14 @@ class DkeyMaskCommand(Command):
 
 class MixSettingsCommand(Command):
     """
-    Implementation of the `CTMx` command. This sets the transition duration for the mix transition
-    panel.
+    Implementation of the `CTMx` command.  This sets the parameters for mix
+    transition.  It is equivalent to adjusting paramters on the Mix tab
+    of the Transitions settings in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
-    0      1    u8     M/E index, 0-indexed
+    0      1    u8     M/E index
     1      1    u8     Rate in frames
     2      2    ?      unknown
     ====== ==== ====== ===========
@@ -739,8 +774,8 @@ class MixSettingsCommand(Command):
 
     def __init__(self, index, rate):
         """
-        :param index: 0-indexed M/E number to set the transition duration for
-        :param rate: Transition length in frames
+        :param index: 0-indexed M/E number for the mix settings
+        :param rate: Transition duration in frames
         """
         self.index = index
         self.rate = rate
@@ -752,8 +787,9 @@ class MixSettingsCommand(Command):
 
 class DipSettingsCommand(Command):
     """
-    Implementation of the `CTDp` command. This sets the settings for the dip transition
-    panel.
+    Implementation of the `CTDp` command.  This sets the parameters for
+    dip transitions.  It is equivalent to adjusting parameters on the Dip tab
+    of the Transitions settings in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -770,9 +806,9 @@ class DipSettingsCommand(Command):
 
     def __init__(self, index, rate=None, source=None):
         """
-        :param index: 0-indexed M/E number to control the preview bus of
-        :param rate: Set new transition rate, or None
-        :param source: Set the dip source, or None
+        :param index: 0-indexed M/E number for the dip settings
+        :param rate: Transition duration in frames
+        :param source: The source for the dip transition
         """
 
         self.index = index
@@ -794,8 +830,9 @@ class DipSettingsCommand(Command):
 
 class WipeSettingsCommand(Command):
     """
-    Implementation of the `CTWp` command. This sets the settings for the wipe transition
-    panel.
+    Implementation of the `CTWp` command.  This sets the parameters for
+    wipe transitions.  It is equivalent to adjusting parameters on the Wipe tab
+    of the Transitions settings in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -834,17 +871,17 @@ class WipeSettingsCommand(Command):
     def __init__(self, index, rate=None, pattern=None, width=None, source=None, symmetry=None, softness=None,
                  positionx=None, positiony=None, reverse=None, flipflop=None):
         """
-        :param index: 0-indexed M/E number to change the wipe settings for
-        :param rate: Set new transition rate, or None
-        :param pattern: Set transition pattern id, or None
-        :param width: Set transition border width, or None
-        :param source: Set transition border fill source index, or None
-        :param symmetry: Set transition symmetry, or None
-        :param softness: Set transition softness, or None
-        :param positionx: Set transition origin x, or None
-        :param positiony: Set transition origin y, or None
-        :param reverse: Set the reverse flag for the transition, or None
-        :param flipflop: Set the flipflop flag for the transition, or None
+        :param index: 0-indexed M/E number for the wipe settings
+        :param rate: Transition duration in frames
+        :param pattern: Transition pattern id
+        :param width: Transition border width
+        :param source: Transition border fill source index
+        :param symmetry: Transition symmetry
+        :param softness: Transition softness
+        :param positionx: Transition origin x
+        :param positiony: Transition origin y
+        :param reverse: The reverse flag for the transition
+        :param flipflop: The flipflop flag for the transition
         """
 
         self.index = index
@@ -899,8 +936,9 @@ class WipeSettingsCommand(Command):
 
 class DveSettingsCommand(Command):
     """
-    Implementation of the `CTDv` command. This sets the settings for the DVE transition
-    panel.
+    Implementation of the `CTDv` command.  This sets the parameters for
+    DVE transitions.  It is equivalent to adjusting parameters of the DVE tab
+    of the Transitions settings of the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -943,18 +981,18 @@ class DveSettingsCommand(Command):
     def __init__(self, index, rate=None, style=None, fill_source=None, key_source=None, key_enable=None,
                  key_premultiplied=None, key_clip=None, key_gain=None, key_invert=None, reverse=None, flipflop=None):
         """
-        :param index: 0-indexed M/E number to change the DVE settings for
-        :param rate: Set new transition rate, or None
-        :param style: Set new transition style, or None
-        :param fill_source: Set new fill source, or None
-        :param key_source: Set new key source, or None
-        :param key_enable: Enable the keyer, or None
-        :param key_premultiplied: Key is premultiplied alpha, or None
-        :param key_clip: Key clip, or None
-        :param key_gain: Key gain, or None
-        :param key_invert: Invert the key source, or None
-        :param reverse: Set the reverse flag for the transition, or None
-        :param flipflop: Set the flipflop flag for the transition, or None
+        :param index: 0-indexed M/E number for the DVE settings
+        :param rate: Transition duration in frames
+        :param style: Transition style
+        :param fill_source: Fill source
+        :param key_source: Key source
+        :param key_enable: True enables the keyer; False disables
+        :param key_premultiplied: Key is premultiplied alpha
+        :param key_clip: Key clip
+        :param key_gain: Key gain
+        :param key_invert: Invert the key source
+        :param reverse: Reverse flag for the transition
+        :param flipflop: Flipflop flag for the transition
         """
 
         self.index = index
@@ -1013,7 +1051,9 @@ class DveSettingsCommand(Command):
 
 class AudioMasterPropertiesCommand(Command):
     """
-    Implementation of the `CAMM` command. This sets the settings the master channel of legacy audio.
+    Implementation of the `CAMM` command.  This sets the parameters of the
+    master channel of legacy audio.  Audio properties are accessed via
+    the UI Audio panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -1037,8 +1077,8 @@ class AudioMasterPropertiesCommand(Command):
 
     def __init__(self, volume=None, afv=None):
         """
-        :param volume: New volume of the master channel, or None
-        :param afv: Enable AFV for master, following the Fade-to-black, or None
+        :param volume: Volume of the master channel
+        :param afv: Enable AFV for master, following the Fade-to-black
         """
         self.volume = volume
         self.afv = afv
@@ -1059,7 +1099,9 @@ class AudioMasterPropertiesCommand(Command):
 
 class AudioMonitorPropertiesCommand(Command):
     """
-    Implementation of the `CAMm` command. This sets the settings the monitor bus of legacy audio.
+    Implementation of the `CAMm` command.  This sets the parameters of the
+    monitor bus of legacy audio.  Audio properties are accessed via
+    the UI Audio panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -1091,7 +1133,7 @@ class AudioMonitorPropertiesCommand(Command):
     def __init__(self, enabled=None, volume=None, mute=None, solo=None, solo_source=None, dim=None, dim_volume=None):
         """
         :param enabled:
-        :param volume: New volume of the master channel, or None
+        :param volume: Volume of the master channel
         :param mute:
         :param solo:
         :param solo_source:
@@ -1137,7 +1179,9 @@ class AudioMonitorPropertiesCommand(Command):
 
 class AudioInputCommand(Command):
     """
-    Implementation of the `CAMI` command. This sets the settings of a channel strip in legacy audio.
+    Implementation of the `CAMI` command.  This sets the parameters of a
+    channel strip in legacy audio.  Audio properties are accessed via the
+    UI Audio panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -1206,7 +1250,9 @@ class AudioInputCommand(Command):
 
 class FairlightMasterPropertiesCommand(Command):
     """
-    Implementation of the `CFMP` command. This sets the settings the master channel of fairlight audio.
+    Implementation of the `CFMP` command.  This sets the parameters of the
+    master channel of fairlight audio.  Audio properties are accessed via
+    the UI Audio panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -1232,7 +1278,6 @@ class FairlightMasterPropertiesCommand(Command):
     6   ?
     7   ?
     === ==========
-
 
     """
 
@@ -1276,12 +1321,16 @@ class FairlightMasterPropertiesCommand(Command):
 
 class FairlightStripPropertiesCommand(Command):
     """
-    Implementation of the `CFSP` command. This sets the settings of a channel strip in fairlight audio.
+    Implementation of the `CFSP` command.  This sets the parameters of a channel
+    strip in fairlight audio.  Audio properties are accessed via the UI Audio
+    panel.
 
-    The source index is the same as the video source index from the InputProperties fields.
+    The source index is the same as the video source index from the
+    InputProperties fields.
 
-    For normal channel strips the channel index should be -1. If the channel is split (two mono channels instead of a
-    stereo input) the channel numbers are 0 and 1.
+    For normal channel strips the channel index should be -1.  If the channel
+    is split (two mono channels instead of a stereo input) the channel numbers
+    are 0 and 1.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -1328,7 +1377,7 @@ class FairlightStripPropertiesCommand(Command):
         :param dynamics_gain: Make-up gain from the dynamics dialog
         :param balance: Channel balance or pan
         :param volume: The volume fader level
-        :param state: Bitfield for the mute and AFV state. 1=off, 2=on, 4=afv
+        :param state: Bit field for the mute and AFV state. 1=off, 2=on, 4=afv
         """
         self.source = source
         self.channel = channel
@@ -1381,7 +1430,9 @@ class FairlightStripPropertiesCommand(Command):
 
 class FairlightEqBandPropertiesCommand(Command):
     """
-    Implementation of the `CEBP` command. This sets the settings of a single EQ band in the fairlight audio mixer.
+    Implementation of the `CEBP` command.  This sets the parameters of a single
+    EQ band in the fairlight audio mixer.  Audio properties are accessed via
+    the UI Audio panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -1472,12 +1523,14 @@ class FairlightEqBandPropertiesCommand(Command):
 
 class KeyOnAirCommand(Command):
     """
-    Implementation of the `CKOn` command. This enables an upstream keyer without having a transition.
+    Implementation of the `CKOn` command.  This enables an upstream keyer using
+    a cut transition.  It is equivalent to pressing the On Air button in the
+    Next Transition area of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
-    0      1    u8     M/E index, 0-indexed
+    0      1    u8     M/E index
     1      1    u8     Keyer index
     2      1    bool   Enabled
     4      1    ?      unknown
@@ -1487,9 +1540,9 @@ class KeyOnAirCommand(Command):
 
     def __init__(self, index, keyer, enabled):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number for the upstream keyer
         :param keyer: 0-indexed keyer number
-        :param enabled: Set the keyer on-air or disabled
+        :param enabled: True set the keyer on-air; False for off
         """
         self.index = index
         self.keyer = keyer
@@ -1502,12 +1555,15 @@ class KeyOnAirCommand(Command):
 
 class KeyFillCommand(Command):
     """
-    Implementation of the `CKeF` command. This enables an upstream keyer without having a transition.
+    Implementation of the `CKeF` command.  This sets the fill source for the
+    upstream keyer.  It is equivalent to adjusting a Fill Source on a
+    selected tab in the Upstream Key settings of the Palettes menu of the
+    UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
-    0      1    u8     M/E index, 0-indexed
+    0      1    u8     M/E index
     1      1    u8     Keyer index
     2      2    u16    Source index
     ====== ==== ====== ===========
@@ -1516,9 +1572,9 @@ class KeyFillCommand(Command):
 
     def __init__(self, index, keyer, source):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number for the upstream keyer
         :param keyer: 0-indexed keyer number
-        :param source: Source index for the keyer fill
+        :param source: Source index for the fill
         """
         self.index = index
         self.keyer = keyer
@@ -1531,12 +1587,13 @@ class KeyFillCommand(Command):
 
 class KeyCutCommand(Command):
     """
-    Implementation of the `CKeC` command. This sets the key source for an upstream keyer.
+    Implementation of the `CKeC` command.  This sets the key source for an
+    upstream keyer.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
-    0      1    u8     M/E index, 0-indexed
+    0      1    u8     M/E index
     1      1    u8     Keyer index
     2      2    u16    Source index
     ====== ==== ====== ===========
@@ -1545,7 +1602,7 @@ class KeyCutCommand(Command):
 
     def __init__(self, index, keyer, source):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number for the upstream keyer
         :param keyer: 0-indexed keyer number
         :param source: Source index for the keyer fill
         """
@@ -1560,13 +1617,22 @@ class KeyCutCommand(Command):
 
 class KeyTypeCommand(Command):
     """
-    Implementation of the `CKTp` command. This sets the type of an upstream keyer.
+    Implementation of the `CKTp` command.  This sets the type of an upstream
+    keyer.  It is equivalent to selecting an Upstream Key tab in the Palettes
+    menu of the UI Switcher panel.
+
+    The type argument takes one of the values from the KeyTypeCommand constants:
+
+    - KeyTypeCommand.LUMA
+    - KeyTypeCommand.CHROMA
+    - KeyTypeCommand.PATTERN
+    - KeyTypeCommand.DVE
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      1    u8     Mask
-    1      1    u8     M/E index, 0-indexed
+    1      1    u8     M/E index
     2      1    u8     Keyer index
     3      1    u8     Keyer type
     4      1    bool   Fly enabled
@@ -1589,10 +1655,10 @@ class KeyTypeCommand(Command):
 
     def __init__(self, index, keyer, type=None, fly_enabled=None):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number for the upstream keyer
         :param keyer: 0-indexed keyer number
-        :param type:
-        :param fly-enabled:
+        :param type: The key type
+        :param fly-enabled: True enables the flying key; False disables
         """
         self.index = index
         self.keyer = keyer
@@ -1615,13 +1681,16 @@ class KeyTypeCommand(Command):
 
 class KeyPropertiesDveCommand(Command):
     """
-    Implementation of the `CKDV` command. This sets the settings of the DVE in an upstream keyer
+    Implementation of the `CKDV` command.  This sets the parameters of the DVE
+    effect in an upstream keyer.  It is equivalent to adjusting parameters in
+    the Upstream Key settings DVE tab of the Palettes menu of the UI Switcher
+    panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      1    u32    Mask
-    4      1    u8     M/E index, 0-indexed
+    4      1    u8     M/E index
     5      1    u8     Keyer index
     6      2    ?      unknown
     8      4    i32    Size x [0 - 9900]
@@ -1695,12 +1764,12 @@ class KeyPropertiesDveCommand(Command):
                  altitude=None, mask_enabled=None, mask_top=None, mask_bottom=None, mask_left=None, mask_right=None,
                  rate=None):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number of the upstream keyer
         :param keyer: 0-indexed keyer number
-        :param size_x:
-        :param size_y:
-        :param pos_x:
-        :param size_y:
+        :param size_x: The relative size in the x-direction; 1000 is full
+        :param size_y: The relative size in the y-direction; 1000 is full
+        :param pos_x: The position in the x-direction; 0 is centre
+        :param size_y: The position in the y-direction; 0 is centre
         :param rotation:
         :param border_enabled:
         :param shadow_enabled:
@@ -1722,7 +1791,7 @@ class KeyPropertiesDveCommand(Command):
         :param mask_bottom:
         :param mask_left:
         :param mask_right:
-        :param rate:
+        :param rate: Effect duration in frames
         """
         self.index = index
         self.keyer = keyer
@@ -1881,13 +1950,16 @@ class KeyPropertiesDveCommand(Command):
 
 class KeyPropertiesAdvancedChromaColorpickerCommand(Command):
     """
-    Implementation of the `CACC` command. This sets the state of the colorpicker for the advanced chroma keyer
+    Implementation of the `CACC` command.  This sets the state of the
+    colorpicker for the upstream advanced chroma keyer.  It is equivalent to
+    adjusting color picker parameters in the Upstream Key settings Chroma tab
+    of the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      1    u8     Mask
-    1      1    u8     M/E index, 0-indexed
+    1      1    u8     M/E index
     2      1    u8     Keyer index
     3      1    bool   Enable cursor
     4      1    bool   Enable preview
@@ -1918,7 +1990,7 @@ class KeyPropertiesAdvancedChromaColorpickerCommand(Command):
 
     def __init__(self, index, keyer, cursor=None, preview=None, x=None, y=None, size=None, Y=None, Cb=None, Cr=None):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number of the upstream keyer
         :param keyer: 0-indexed keyer number
         :param cursor:
         :param preview:
@@ -1978,13 +2050,16 @@ class KeyPropertiesAdvancedChromaColorpickerCommand(Command):
 
 class KeyPropertiesAdvancedChromaCommand(Command):
     """
-    Implementation of the `CACK` command. This sets the state for the advanced chroma keyer
+    Implementation of the `CACK` command.  This sets the state for the
+    upstream advanced chroma keyer.  It is equivalent to adjusting parameters
+    in the Upstream Key settings Chroma tab of the Palettes menu of the UI
+    Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      2    u16    Mask
-    2      1    u8     M/E index, 0-indexed
+    2      1    u8     M/E index
     3      1    u8     Keyer index
     4      2    u16    Foreground [0 - 1000]
     6      2    u16    Background [0 - 1000]
@@ -2021,7 +2096,7 @@ class KeyPropertiesAdvancedChromaCommand(Command):
     def __init__(self, index, keyer, foreground=None, background=None, key_edge=None, spill=None, flare=None,
                  brightness=None, contrast=None, saturation=None, red=None, green=None, blue=None):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number of the upstream keyer
         :param keyer: 0-indexed keyer number
         :param foreground:
         :param background:
@@ -2095,13 +2170,16 @@ class KeyPropertiesAdvancedChromaCommand(Command):
 
 class KeyPropertiesLumaCommand(Command):
     """
-    Implementation of the `CKLm` command. This sets the key source for an upstream keyer.
+    Implementation of the `CKLm` command. This sets the key source for an
+    upstream luma keyer.  It is equivalent to adjusting parameters in the
+    Upstream Key settings Luma tab of the Palettes menu of the UI Switcher
+    panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      1    u8     Mask
-    1      1    u8     M/E index, 0-indexed
+    1      1    u8     M/E index
     2      1    u8     Keyer index
     3      1    bool   Pre-multiplied
     4      2    u16    Clip
@@ -2123,7 +2201,7 @@ class KeyPropertiesLumaCommand(Command):
 
     def __init__(self, index, keyer, premultiplied=None, clip=None, gain=None, invert_key=None):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number of the upstream keyer
         :param keyer: 0-indexed keyer number
         :param premultiplied:
         :param clip:
@@ -2159,12 +2237,15 @@ class KeyPropertiesLumaCommand(Command):
 
 class KeyerKeyframeSetCommand(Command):
     """
-    Implementation of the `SFKF` command. This sets the A or B keyframe for the flying key in the keyer.
+    Implementation of the `SFKF` command.  This sets the A or B keyframe
+    for the upstream flying key to the current DVE values (pos_x, pos_y,
+    size_x, size_y).  It is equivalent to adjusting Keyframe parameters in the
+    Upstream Key settings DVE tab in the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
-    0      1    u8     M/E index, 0-indexed
+    0      1    u8     M/E index
     1      1    u8     Keyer index
     2      1    u8     keyframe, A = 1, B = 2
     3      1    ?      unknown
@@ -2174,9 +2255,9 @@ class KeyerKeyframeSetCommand(Command):
 
     def __init__(self, index, keyer, keyframe):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number of the upstream keyer
         :param keyer: 0-indexed keyer number
-        :param keyframe: wether to store the A or B frame, set to 'A' or 'B'
+        :param keyframe: The keyframe to set, either 'A' or 'B'
         """
         self.index = index
         self.keyer = keyer
@@ -2190,14 +2271,17 @@ class KeyerKeyframeSetCommand(Command):
 
 class KeyerKeyframeRunCommand(Command):
     """
-    Implementation of the `RFlK` command. This makes the flying key run to full, A or B
+    Implementation of the `RFlK` command.  This makes the upstream DVE keyer
+    flying key run to A, B, Full or Infinite.  It is equivalent to pressing
+    A, B or fill in the Keyframe area of the Upstream Key settings DVE tab in
+    the Palettes menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      1    u8     Mask
-    1      1    u8     M/E index, zero indexed
-    2      1    u8     Keyer index, zero indexed
+    1      1    u8     M/E index
+    2      1    u8     Keyer index
     3      1    ?      unknown
     4      1    u8     Keyframe, 1=A, 2=B, 3=Full, 4=Infinite
     5      1    u8     Ininite run index
@@ -2208,10 +2292,10 @@ class KeyerKeyframeRunCommand(Command):
 
     def __init__(self, index, keyer, run_to=None, set_infinite=None):
         """
-        :param index: 0-indexed M/E number
+        :param index: 0-indexed M/E number of the upstream keyer
         :param keyer: 0-indexed keyer number
-        :param run_to:
-        :param set_infinite:
+        :param run_to: The keyframe: 'A', 'B', 'Full' or 'Infinite'.
+        :param set_infinite: Infinite run index
         """
         self.index = index
         self.keyer = keyer
@@ -2238,7 +2322,9 @@ class KeyerKeyframeRunCommand(Command):
 
 class RecorderStatusCommand(Command):
     """
-    Implementation of the `RcTM` command. This starts and stops the stream recorder.
+    Implementation of the `RcTM` command.  This starts and stops the stream
+    recorder.  It is equivalent to pressing REC in the Record area of the
+    Output menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2262,7 +2348,9 @@ class RecorderStatusCommand(Command):
 
 class RecordingSettingsSetCommand(Command):
     """
-    Implementation of the `CRMS` command. This sets the parameters for the stream recorder.
+    Implementation of the `CRMS` command.  This sets the parameters for the
+    stream recorder.  It is equivalent to adjusting parameters in the Record
+    settings of the Output menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2278,10 +2366,10 @@ class RecordingSettingsSetCommand(Command):
 
     def __init__(self, filename=None, disk1=None, disk2=None, record_in_camera=None):
         """
-        :param filename: Filename for recording, or None
-        :param disk1: ID for disk 1, or None
-        :param disk2: ID for disk 2, or None
-        :param record_in_camera: Trigger recording on attached cameras, or None
+        :param filename: Filename for recording
+        :param disk1: ID for disk 1
+        :param disk2: ID for disk 2
+        :param record_in_camera: Trigger recording on attached cameras
         """
         self.filename = filename
         self.disk1 = disk1
@@ -2308,7 +2396,9 @@ class RecordingSettingsSetCommand(Command):
 
 class StreamingServiceSetCommand(Command):
     """
-    Implementation of the `CRSS` command. This sets the parameters for the live stream output.
+    Implementation of the `CRSS` command.  This sets the parameters for the live
+    stream output.  It is equivalent to adjusting parameters in the Live Stream
+    settings of the Output menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2335,11 +2425,11 @@ class StreamingServiceSetCommand(Command):
 
     def __init__(self, name=None, url=None, key=None, bitrate_min=None, bitrate_max=None):
         """
-        :param name: New streaming service name, or None
-        :param url: RTMP url, or None
-        :param key: Stream key, or None
-        :param bitrate_min: Minimum bitrate, or None
-        :param bitrate_max: Maximum bitrate, or None
+        :param name: New streaming service name
+        :param url: RTMP url
+        :param key: Stream key
+        :param bitrate_min: Minimum bitrate
+        :param bitrate_max: Maximum bitrate
         """
         self.name = name
         self.url = url
@@ -2373,8 +2463,9 @@ class StreamingServiceSetCommand(Command):
 
 class StreamingAudioBitrateCommand(Command):
     """
-    Implementation of the `STAB` command. This sets the audio bitrate parameters for the stream and recording.
-    In practice this is always set to 128k min/max bitrate.
+    Implementation of the `STAB` command.  This sets the audio bitrate
+    parameters for the stream and recording.  In practice this is always set
+    to 128k min/max bitrate.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2399,7 +2490,9 @@ class StreamingAudioBitrateCommand(Command):
 
 class StreamingStatusSetCommand(Command):
     """
-    Implementation of the `StrR` command. This starts and stops the live stream
+    Implementation of the `StrR` command. This starts and stops the live
+    stream.  It is equivalent to pressing ON AIR in the Live Stream settings
+    of the Output menu of the UI Switcher panel.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2412,7 +2505,7 @@ class StreamingStatusSetCommand(Command):
 
     def __init__(self, streaming):
         """
-        :param streaming: True to start streaming, False to stop streaming
+        :param streaming: True starts streaming; False stops
         """
         self.streaming = streaming
 
@@ -2423,8 +2516,8 @@ class StreamingStatusSetCommand(Command):
 
 class MultiviewPropertiesCommand(Command):
     """
-    Implementation of the `CMvP` command. This sets the layout of a multiview output and can set a flag for
-    swapping the program and preview window.
+    Implementation of the `CMvP` command. This sets the layout of a multiview
+    output and can set a flag for swapping the program and preview window.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2442,8 +2535,8 @@ class MultiviewPropertiesCommand(Command):
     def __init__(self, index, layout=None, swap=None):
         """
         :param index: 0-indexed multiview output number
-        :param layout: The layout number to use, or None
-        :param swap: Make the program/preview swapped or not, or None
+        :param layout: The layout number to use
+        :param swap: Make the program/preview swapped or not
         """
         self.index = index
         self.layout = layout
@@ -2464,7 +2557,7 @@ class MultiviewPropertiesCommand(Command):
 
 class MultiviewInputCommand(Command):
     """
-    Implementation of the `CMvI` command. This routes a source to one of the windows in a multiview output
+    Implementation of the `CMvI` command.  This routes a source to one of the windows in a multiview output.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2493,7 +2586,8 @@ class MultiviewInputCommand(Command):
 
 class LockCommand(Command):
     """
-    Implementation of the `LOCK` command. This requests a new lock, used for data transfers.
+    Implementation of the `LOCK` command.  This requests a new lock, used for
+    data transfers.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2508,7 +2602,7 @@ class LockCommand(Command):
     def __init__(self, store, state):
         """
         :param store: Store number to get the lock for
-        :param state: True to request the lock, False to release it
+        :param state: True requests the lock; False releases it
         """
         self.store = store
         self.state = state
@@ -2520,7 +2614,8 @@ class LockCommand(Command):
 
 class PartialLockCommand(Command):
     """
-    Implementation of the `PLCK` command. This requests a new lock, used for data transfers.
+    Implementation of the `PLCK` command.  This requests a new lock, used for
+    data transfers.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2547,7 +2642,8 @@ class PartialLockCommand(Command):
 
 class TransferDownloadRequestCommand(Command):
     """
-    Implementation of the `FTSU` command. This requests download from the switcher to the client.
+    Implementation of the `FTSU` command. This requests download from the
+    switcher to the client.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2585,7 +2681,8 @@ class TransferDownloadRequestCommand(Command):
 
 class TransferUploadRequestCommand(Command):
     """
-    Implementation of the `FTSD` command. This requests an upload from the client to the switcher.
+    Implementation of the `FTSD` command. This requests an upload from the
+    client to the switcher.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2595,7 +2692,7 @@ class TransferUploadRequestCommand(Command):
     4      2    ?      unknown
     6      2    u16    Slot
     8      2    u32    Data length
-    12     2    u16    Mode bitfield
+    12     2    u16    Mode bit field
     14     2    ?      unknown
     ====== ==== ====== ===========
 
@@ -2636,7 +2733,8 @@ class TransferUploadRequestCommand(Command):
 
 class TransferDataCommand(Command):
     """
-    Implementation of the `FTDa` command. This is a chunk of data being sent from the client to the hardware.
+    Implementation of the `FTDa` command.  This is a chunk of data being sent
+    from the client to the hardware.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2663,8 +2761,10 @@ class TransferDataCommand(Command):
 
 class TransferFileDataCommand(Command):
     """
-    Implementation of the `FTFD` command. This is the file metadata for the uploaded file and should be sent to the
-    hardware after all the FTDa commands have been sent. It contains the name and MD5 hash of the uploaded data.
+    Implementation of the `FTFD` command.  This is the file metadata for the
+    uploaded file and should be sent to the hardware after all the FTDa
+    commands have been sent. It contains the name and MD5 hash of the uploaded
+    data.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2700,7 +2800,8 @@ class TransferFileDataCommand(Command):
 
 class TransferAckCommand(Command):
     """
-    Implementation of the `FTUA` command. This is an acknowledgement for FTDa packets.
+    Implementation of the `FTUA` command.  This is an acknowledgement for FTDa
+    packets.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2726,7 +2827,8 @@ class TransferAckCommand(Command):
 
 class SendAudioLevelsCommand(Command):
     """
-    Implementation of the `SALN` command. This is an acknowledgement for FTDa packets.
+    Implementation of the `SALN` command.  This is an acknowledgement for FTDa
+    packets.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2750,8 +2852,8 @@ class SendAudioLevelsCommand(Command):
 
 class SendFairlightLevelsCommand(Command):
     """
-    Implementation of the `SFLN` command. This enables or disables receiving the 10Hz audio level update packets for
-    the Audio page.
+    Implementation of the `SFLN` command.  This enables or disables receiving
+    the 10Hz audio level update packets for the Audio page.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2775,7 +2877,8 @@ class SendFairlightLevelsCommand(Command):
 
 class CameraControlCommand(Command):
     """
-    Implementation of the `CCmd` command. This sends a camera control command to an attached blackmagic design camera.
+    Implementation of the `CCmd` command.  This sends a camera control command
+    to an attached blackmagic design camera.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2853,7 +2956,8 @@ class CameraControlCommand(Command):
 
 class VideoModeCommand(Command):
     """
-    Implementation of the `CVdM` command. This sets the main video mode for the hardware
+    Implementation of the `CVdM` command.  This sets the main video mode for
+    the hardware.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2867,7 +2971,7 @@ class VideoModeCommand(Command):
 
     def __init__(self, mode):
         """
-        :param mode: The new video mode ID
+        :param mode: Video mode ID
         """
         self.mode = mode
 
@@ -2878,8 +2982,8 @@ class VideoModeCommand(Command):
 
 class AutoInputVideoModeCommand(Command):
     """
-    Implementation of the `AiVM` command. This enables or disables automatic video mode detection based on the video
-    signal.
+    Implementation of the `AiVM` command.  This enables or disables automatic
+    video mode detection based on the video signal.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2903,7 +3007,8 @@ class AutoInputVideoModeCommand(Command):
 
 class InputPropertiesCommand(Command):
     """
-    Implementation of the `CInL` command. This sets labels and routing for video inputs
+    Implementation of the `CInL` command.  This sets labels and routing for
+    video inputs.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2959,7 +3064,8 @@ class TimeRequestCommand(Command):
 
 class SetTimeOfDayCommand(Command):
     """
-    Set the time of day on the hardware. Used my ATEMSC at startup to set the atem to the system clock of the computer.
+    Set the time of day on the hardware.  Used my ATEMSC at startup to set the
+    ATEM to the system clock of the computer.
     """
 
     def __init__(self, time):
@@ -2975,8 +3081,8 @@ class SetTimeOfDayCommand(Command):
 
 class TransferCompleteCommand(Command):
     """
-    Implementation of the `*XFC` command. This is an command that's part of OpenSwitcher for the TCP protocol and not part
-    of the actual ATEM protocol.
+    Implementation of the `*XFC` command.  This command is part of the
+    OpenSwitcher TCP protocol and not part of the actual ATEM protocol.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -2993,7 +3099,8 @@ class TransferCompleteCommand(Command):
         """
         :param store: Transfer store index
         :param slot: Transfer slot index
-        :param upload: True if an upload was completed, False if a download was completed
+        :param upload: True if an upload was completed; False if a download
+                       was completed
         """
         self.store = store
         self.slot = slot
@@ -3006,13 +3113,14 @@ class TransferCompleteCommand(Command):
 
 class SupersourceBoxPropertiesCommand(Command):
     """
-    Implementation of the `CSBP` command. This sets the state of the colorpicker for the advanced chroma keyer
+    Implementation of the `CSBP` command.  This sets the state of the
+    colorpicker for the advanced chroma keyer.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
     0      1    u8     Mask
-    1      1    u8     M/E index, 0-indexed
+    1      1    u8     M/E index
     2      1    u8     Keyer index
     3      1    bool   Enable cursor
     4      1    bool   Enable preview
@@ -3115,7 +3223,7 @@ class SupersourceBoxPropertiesCommand(Command):
 
 class MacroRecordCommand(Command):
     """
-    Implementation of the `MSRc` command. This triggers recording of a macro.
+    Implementation of the `MSRc` command.  This triggers recording of a macro.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
@@ -3153,7 +3261,8 @@ class MacroRecordCommand(Command):
 
 class MacroActionCommand(Command):
     """
-    Implementation of the `MAct` command. This performs special actions while recording a macro.
+    Implementation of the `MAct` command.  This performs special actions while
+    recording a macro.
 
     ====== ==== ====== ===========
     Offset Size Type   Description
