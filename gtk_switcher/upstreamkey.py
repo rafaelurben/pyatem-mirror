@@ -519,3 +519,9 @@ class UpstreamKeyer(Gtk.Frame):
             return
         cmd = KeyPropertiesAdvancedChromaCommand(index=self.index, keyer=self.keyer, blue=int(widget.get_value()))
         self.connection.mixer.send_commands([cmd])
+
+    @Gtk.Template.Callback()
+    def on_mask_enable_clicked(self, widget):
+        state = widget.get_style_context().has_class('active')
+        cmd = KeyPropertiesDveCommand(index=self.index, keyer=self.keyer, mask_enabled=not state)
+        self.connection.mixer.send_commands([cmd])
