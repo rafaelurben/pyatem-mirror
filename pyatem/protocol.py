@@ -377,6 +377,10 @@ class AtemProtocol:
             # Start next transfer in the queue
             self._transfer_trigger(self.transfer.store)
             return
+        elif key == 'key-properties-dve':
+            preset = contents.mini_preset_key
+            if preset is not None:
+                self._raise('pip-preset', preset)
 
         if key in self.FIELDNAME_UNIQUE:
             idxes = self.FIELDNAME_UNIQUE[key].unpack_from(raw, 0)

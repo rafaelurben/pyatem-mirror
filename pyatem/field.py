@@ -2208,6 +2208,25 @@ class KeyPropertiesDveField(FieldBase):
     def get_border_color_rgb(self):
         return colorsys.hls_to_rgb(self.border_hue / 360.0, self.border_luma, self.border_saturation)
 
+    @property
+    def mini_preset_key(self):
+        if self.index != 0:
+            return None
+        if self.keyer != 0 and self.keyer != 1:
+            return None
+
+        if self.size_x == 200 and self.size_y == 200 and self.rotation == 0 and self.border_enabled and not self.shadow_enabled and self.border_inner_width == 20 and self.border_opacity == 100 and self.light_angle == 360:
+            if self.pos_x == -12500 and self.pos_y == 7000:
+                return 'TOPLEFT'
+            elif self.pos_x == 12500 and self.pos_y == 7000:
+                return 'TOPRIGHT'
+            elif self.pos_x == -12500 and self.pos_y == -7000:
+                return 'BOTTOMLEFT'
+            elif self.pos_x == 12500 and self.pos_y == 7000:
+                return 'BOTTOMRIGHT'
+
+        return None
+
     def __repr__(self):
         return '<key-properties-dve me={}, key={}>'.format(self.index, self.keyer)
 
