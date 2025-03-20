@@ -59,6 +59,8 @@ switcher_sources = [
     'debugger.py',
     'presetwindow.py',
     'routing.py',
+    'palettepanel.py',
+    'panel_mediaplayer.py',
 ]
 
 install_data(switcher_sources, install_dir: moduledir)
