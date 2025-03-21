@@ -19,15 +19,15 @@ class DownstreamKeyerPanel(PalettePanel):
         self.adj_clip = Gtk.Adjustment(upper=1000, step_increment=1, page_increment=10)
         self.adj_gain = Gtk.Adjustment(upper=1000, step_increment=1, page_increment=10)
 
-        self.fill_source = self.add_control_dropdown('Fill source', model_fill, handler=self.on_fill_change)
-        self.key_source = self.add_control_dropdown('Key source', model_key, handler=self.on_key_change)
+        self.fill_source = self.add_control_dropdown(_("Fill source"), model_fill, handler=self.on_fill_change)
+        self.key_source = self.add_control_dropdown(_("Key source"), model_key, handler=self.on_key_change)
         self.add_separator()
-        self.premultiplied = self.add_control_toggle('Key', 'Pre multiplied', handler=self.on_premultiplied)
-        self.clip = self.add_control_slider('Clip', self.adj_clip, handler=self.on_clip)
-        self.gain = self.add_control_slider('Gain', self.adj_gain, handler=self.on_gain)
-        self.invert = self.add_control_toggle('Invert', 'Invert', handler=self.on_invert)
+        self.premultiplied = self.add_control_toggle(_("Key"), _("Pre multiplied"), handler=self.on_premultiplied)
+        self.clip = self.add_control_slider(_("Clip"), self.adj_clip, handler=self.on_clip)
+        self.gain = self.add_control_slider(_("Gain"), self.adj_gain, handler=self.on_gain)
+        self.invert = self.add_control_toggle(_("Invert"), _("Invert"), handler=self.on_invert)
         self.add_separator()
-        self.mask_enable = self.add_control_toggle('Use mask', 'Mask')
+        self.mask_enable = self.add_control_toggle(_("Use mask"), _("Mask"))
 
         self.show_all()
 
