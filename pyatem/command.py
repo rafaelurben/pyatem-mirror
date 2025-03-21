@@ -3119,19 +3119,21 @@ class SupersourceBoxPropertiesCommand(Command):
     ====== ==== ====== ===========
     Offset Size Type   Description
     ====== ==== ====== ===========
-    0      1    u8     Mask
-    1      1    u8     M/E index
-    2      1    u8     Keyer index
-    3      1    bool   Enable cursor
-    4      1    bool   Enable preview
+    0      2    u16    Mask
+    2      1    u8     SuperSource index
+    3      1    u8     Box index
+    4      1    bool   Enabled
     5      1    ?      padding
-    6      2    i16    Cursor X [-16000 - 16000]
-    8      2    i16    Cursor Y [-9000 - 9000]
-    10     2    u16    Cursor size [620 - 9925]
-    12     2    u16    Color Y
-    14     2    i16    Color Cb
-    16     2    i16    Color Cr
-    18     2    ?      padding
+    6      2    u16    Source index
+    8      2    i16    Position X [-4800 - 4800]
+    10     2    i16    Position Y [-3400 - 3400]
+    12     2    u16    Size [70 - 1000]
+    14     1    bool   Crop enable
+    15     1    ?      padding
+    16     2    u16    Crop top [0 - 18000]
+    18     2    u16    Crop bottom [0 - 18000]
+    20     2    u16    Crop left [0 - 32000]
+    22     2    u16    Crop right [0 - 32000]
     ====== ==== ====== ===========
 
     === ==========
