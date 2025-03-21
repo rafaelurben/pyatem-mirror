@@ -14,7 +14,6 @@ from datetime import datetime
 import gi
 
 from gtk_switcher.debugger import DebuggerWindow
-from gtk_switcher.presetwindow import PresetWindow
 from gtk_switcher.routing import Routing
 from gtk_switcher.videohubconnection import VideoHubConnection
 from pyatem.hexdump import hexdump
@@ -237,121 +236,11 @@ class AtemWindow(SwitcherPage, MediaPage, AudioPage, CameraPage):
 
         self.window.add_accel_group(accel)
 
-        self.preset_models = {
-            "colors": Gio.Menu(),
-            "dsk": Gio.Menu(),
-        }
-        self.preset_submenu = {}
-        self.preset_context = None
-        self.presets = {}
-
-        xdg_config_home = os.path.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config'))
-
-        for name in self.preset_models:
-            self.preset_submenu[name] = Gio.Menu()
-            self.preset_models[name].append('Save preset', "app.savepreset")
-            self.preset_models[name].append_section('Presets', self.preset_submenu[name])
-
-            presetdir = os.path.join(xdg_config_home, 'openswitcher', 'presets', name)
-            loaded = {}
-            for existing in glob.glob(os.path.join(presetdir, '*.json')):
-                preset_code = os.path.basename(existing).replace('.json', '')
-                with open(existing, 'r') as handle:
-                    data = json.load(handle)
-                    self.presets[preset_code] = data['fields']
-                    loaded[data['name']] = preset_code
-            ordered = list(sorted(loaded.keys()))
-            for preset_name in ordered:
-                preset_code = loaded[preset_name]
-                mi = Gio.MenuItem.new(preset_name, "app.recallpreset")
-                mi.set_detailed_action(f"app.recallpreset(('{name}', '{preset_code}'))")
-                self.preset_submenu[name].append_item(mi)
-
-        action = Gio.SimpleAction.new("savepreset", None)
-        action.connect("activate", self.on_save_preset)
-        self.application.add_action(action)
-
-        action = Gio.SimpleAction.new("recallpreset", GLib.VariantType.new("(ss)"))
-        action.connect("activate", self.on_recall_preset)
-        self.application.add_action(action)
-
         SwitcherPage.switcher_build(self)
 
         GLib.timeout_add_seconds(1, self.on_clock)
 
         Gtk.main()
-
-    def on_save_preset(self, *args):
-        context = self.preset_context.split(':')
-        presets_fields = {
-            "colors": ['color-generator'],
-            "dsk": ['dkey-properties-base', 'dkey-properties'],
-        }
-        preset_fields = presets_fields[context[0]]
-        contents = []
-        for field in preset_fields:
-            ms = self.connection.mixer.mixerstate[field]
-            if isinstance(ms, dict):
-                for key in ms:
-                    if len(context) == 2:
-                        if key != int(context[1]):
-                            continue
-                    sf = ms[key]
-                    s = sf.serialize()
-                    if s is not None:
-                        s['_name'] = field
-                        contents.append(s)
-
-        dialog = PresetWindow(self.window, self.application)
-        response = dialog.run()
-
-        if response == Gtk.ResponseType.CANCEL:
-            return
-
-        preset_name = dialog.get_name()
-        dialog.destroy()
-
-        code = str(uuid.uuid4())
-        self.presets[code] = contents
-        mi = Gio.MenuItem.new(preset_name, "app.recallpreset")
-        mi.set_detailed_action(f"app.recallpreset(('{context[0]}', '{code}'))")
-        self.preset_submenu[context[0]].append_item(mi)
-
-        xdg_config_home = os.path.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config'))
-        presetdir = os.path.join(xdg_config_home, 'openswitcher', 'presets', context[0])
-        os.makedirs(presetdir, exist_ok=True)
-        presetfile = os.path.join(presetdir, f'{code}.json')
-        with open(presetfile, 'w') as handle:
-            json.dump({
-                'name': preset_name,
-                'fields': contents,
-            }, handle)
-
-    def on_recall_preset(self, action, parameters):
-        parameters = tuple(parameters)
-        context = parameters[0]
-        pc = self.preset_context.split(':')
-        if pc[0] != context:
-            self.log_aw.warning("Preset restore context does not match menu")
-        presetcode = parameters[1]
-        preset = self.presets[presetcode]
-        cmds = []
-
-        instance_override = []
-        for val in pc[1:]:
-            instance_override.append(int(val))
-        if len(instance_override) == 0:
-            instance_override = None
-
-        for field in preset:
-            classname = field['_name'].title().replace('-', '') + "Field"
-            if hasattr(fieldmodule, classname):
-                fieldclass = getattr(fieldmodule, classname)
-                cmds.extend(fieldclass.restore(field, instance_override=instance_override))
-            else:
-                self.log_aw.error(f"Unknown field in preset: {field['_name']}")
-                return
-        self.connection.mixer.send_commands(cmds)
 
     def on_preview_keyboard_change(self, widget, window, key, modifier):
         if self.disable_shortcuts:
