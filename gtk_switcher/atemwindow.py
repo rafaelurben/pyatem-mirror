@@ -267,9 +267,6 @@ class AtemWindow(SwitcherPage, MediaPage, AudioPage, CameraPage):
                 mi.set_detailed_action(f"app.recallpreset(('{name}', '{preset_code}'))")
                 self.preset_submenu[name].append_item(mi)
 
-        self.presets_colors = builder.get_object('presets_colors')
-        self.presets_colors.set_menu_model(self.preset_models['colors'])
-
         action = Gio.SimpleAction.new("savepreset", None)
         action.connect("activate", self.on_save_preset)
         self.application.add_action(action)
@@ -277,6 +274,8 @@ class AtemWindow(SwitcherPage, MediaPage, AudioPage, CameraPage):
         action = Gio.SimpleAction.new("recallpreset", GLib.VariantType.new("(ss)"))
         action.connect("activate", self.on_recall_preset)
         self.application.add_action(action)
+
+        SwitcherPage.switcher_build(self)
 
         GLib.timeout_add_seconds(1, self.on_clock)
 

@@ -8,6 +8,7 @@ from logging import Logger
 
 from gtk_switcher.decorators import field
 from gtk_switcher.layout import LayoutView
+from gtk_switcher.panel_color import ColorPanel
 from gtk_switcher.panel_mediaplayer import MediaPlayerPanel
 from pyatem.command import CutCommand, AutoCommand, FadeToBlackCommand, TransitionSettingsCommand, WipeSettingsCommand, \
     TransitionPositionCommand, TransitionPreviewCommand, ColorGeneratorCommand, MixSettingsCommand, DipSettingsCommand, \
@@ -172,8 +173,7 @@ class SwitcherPage:
             btn.connect('pressed', self.on_dve_transition_style_clicked)
             self.dve_style_squeeze.append(btn)
 
-        self.color1 = builder.get_object('color1')
-        self.color2 = builder.get_object('color2')
+        self.palette_top = builder.get_object('palette_top')
 
         self.model_me1_fill = builder.get_object('model_me1_fill')
         self.model_key = builder.get_object('model_key')
@@ -181,6 +181,13 @@ class SwitcherPage:
         self.model_disks = builder.get_object('model_disks')
         self.model_changing = False
         self.slider_held = False
+
+    def switcher_build(self):
+        colorpanel = ColorPanel(self.connection.mixer)
+        colorpanel.window = self.window
+        colorpanel.application = self.application
+        self.apply_css(colorpanel, self.provider)
+        self.palette_top.add(colorpanel)
 
     def add_mixeffect(self):
         from gtk_switcher.mixeffect import MixEffectBlock
@@ -304,16 +311,6 @@ class SwitcherPage:
 
     def on_prev_trans_clicked(self, widget, index, enabled):
         cmd = TransitionPreviewCommand(index=index, enabled=enabled)
-        self.connection.mixer.send_commands([cmd])
-
-    def on_color1_color_set(self, widget):
-        color = widget.get_rgba()
-        cmd = ColorGeneratorCommand.from_rgb(index=0, red=color.red, green=color.green, blue=color.blue)
-        self.connection.mixer.send_commands([cmd])
-
-    def on_color2_color_set(self, widget):
-        color = widget.get_rgba()
-        cmd = ColorGeneratorCommand.from_rgb(index=1, red=color.red, green=color.green, blue=color.blue)
         self.connection.mixer.send_commands([cmd])
 
     def on_auto_rate_changed(self, widget, index, style, frames):
@@ -681,20 +678,6 @@ class SwitcherPage:
             return
 
         self.me[data.index].set_ftb_state(data.done, data.transitioning)
-
-    @field('color-generator')
-    def on_color_change(self, data):
-        r, g, b = data.get_rgb()
-        color = Gdk.RGBA()
-        color.red = r
-        color.green = g
-        color.blue = b
-        color.alpha = 1.0
-
-        if data.index == 0:
-            self.color1.set_rgba(color)
-        else:
-            self.color2.set_rgba(color)
 
     @field('key-on-air')
     def on_key_on_air_change(self, data):

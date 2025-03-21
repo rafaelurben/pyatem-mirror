@@ -1,9 +1,14 @@
 # Copyright 2025, Martijn Braam and the OpenAtem contributors
 # SPDX-License-Identifier: GPL-3.0-only
-from gi.repository import Gtk, GObject, Gdk, GLib
-import inspect
+import glob
+import json
+import os
+import uuid
 
-# State for the decorators
+from gi.repository import Gtk, GObject, Gdk, GLib, Gio
+import pyatem.field as fieldmodule
+from gtk_switcher.presetwindow import PresetWindow
+
 from pyatem.protocol import AtemProtocol
 
 _palette_field = {}
@@ -12,9 +17,12 @@ _palette_field = {}
 class PalettePanel(Gtk.Overlay):
     __gtype_name__ = 'PalettePanel'
 
-    def __init__(self, panel_name, connection: AtemProtocol, preset_domain=None):
+    def __init__(self, panel_name, connection: AtemProtocol, preset_domain=None, preset_override=None,
+                 preset_fields=None):
         self.panel_name = panel_name
         self.connection = connection
+        self.window = None
+        self.application = None
 
         self.model_changing = False
         self.slider_held = False
@@ -34,19 +42,43 @@ class PalettePanel(Gtk.Overlay):
 
         # Optionally create the preset button for this panel
         self.preset_domain = None
+        self.preset_override = preset_override
         if preset_domain is not None:
+            self.preset_fields = preset_fields
             self.preset_domain = preset_domain
             self.preset_button = Gtk.MenuButton()
             self.preset_button.set_valign(Gtk.Align.START)
             self.preset_button.set_halign(Gtk.Align.END)
+            self.preset_button.set_size_request(28, 28)
             self.set_class(self.preset_button, 'flat', True)
             self.set_class(self.preset_button, 'preset', True)
-            self.apply_css(self.preset_button, self.provider)
             self.add_overlay(self.preset_button)
 
             hamburger = Gtk.Image.new_from_icon_name('open-menu-symbolic', Gtk.IconSize.BUTTON)
             self.preset_button.set_image(hamburger)
             self.preset_button.set_name(preset_domain)
+
+            # Create `panel` action group
+            self._action_group = str(uuid.uuid4())
+            agp = Gio.SimpleActionGroup()
+            self.insert_action_group(self._action_group, agp)
+
+            # Create actions for the panel
+            action = Gio.SimpleAction.new("savepreset", None)
+            action.connect("activate", self._on_save_preset)
+            agp.add_action(action)
+
+            action = Gio.SimpleAction.new("recallpreset", GLib.VariantType.new("(ss)"))
+            action.connect("activate", self._on_recall_preset)
+            agp.add_action(action)
+
+            self._preset_menu = Gio.Menu()
+            self._presets = {}
+            self._preset_submenu = Gio.Menu()
+            self._preset_menu.append('Save preset', f"{self._action_group}.savepreset")
+            self._preset_menu.append_section('Presets', self._preset_submenu)
+            self._load_presets()
+            self.preset_button.set_menu_model(self._preset_menu)
 
         # Create the expandable frame
         self.frame = Gtk.Frame()
@@ -103,6 +135,79 @@ class PalettePanel(Gtk.Overlay):
                         fn_ref(v)
 
         return False
+
+    def _load_presets(self):
+        xdg_config_home = os.path.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config'))
+        presetdir = os.path.join(xdg_config_home, 'openswitcher', 'presets', self.preset_domain)
+        loaded = {}
+        for existing in glob.glob(os.path.join(presetdir, '*.json')):
+            preset_code = os.path.basename(existing).replace('.json', '')
+            with open(existing, 'r') as handle:
+                data = json.load(handle)
+                self._presets[preset_code] = data['fields']
+                loaded[data['name']] = preset_code
+        ordered = list(sorted(loaded.keys()))
+        for preset_name in ordered:
+            preset_code = loaded[preset_name]
+            mi = Gio.MenuItem.new(preset_name, f"{self._action_group}.recallpreset")
+            mi.set_detailed_action(f"{self._action_group}.recallpreset(('{self.preset_domain}', '{preset_code}'))")
+            self._preset_submenu.append_item(mi)
+
+    def _on_recall_preset(self, action, parameters):
+        parameters = tuple(parameters)
+        presetcode = parameters[1]
+        preset = self._presets[presetcode]
+        cmds = []
+
+        for field in preset:
+            classname = field['_name'].title().replace('-', '') + "Field"
+            if hasattr(fieldmodule, classname):
+                fieldclass = getattr(fieldmodule, classname)
+                cmds.extend(fieldclass.restore(field, instance_override=self.preset_override))
+            else:
+                self.log_aw.error(f"Unknown field in preset: {field['_name']}")
+                return
+        self.connection.send_commands(cmds)
+
+    def _on_save_preset(self, action, parameters):
+        contents = []
+        for field in self.preset_fields:
+            ms = self.connection.mixerstate[field]
+            if isinstance(ms, dict):
+                for key in ms:
+                    if self.preset_override is not None and len(self.preset_override) == 1:
+                        if key != int(self.preset_override[0]):
+                            continue
+                    sf = ms[key]
+                    s = sf.serialize()
+                    if s is not None:
+                        s['_name'] = field
+                        contents.append(s)
+
+        dialog = PresetWindow(self.window, self.application)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.CANCEL:
+            return
+
+        preset_name = dialog.get_name()
+        dialog.destroy()
+
+        code = str(uuid.uuid4())
+        self._presets[code] = contents
+        mi = Gio.MenuItem.new(preset_name, "app.recallpreset")
+        mi.set_detailed_action(f"app.recallpreset(('{self.preset_domain}', '{code}'))")
+        self._preset_submenu.append_item(mi)
+
+        xdg_config_home = os.path.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config'))
+        presetdir = os.path.join(xdg_config_home, 'openswitcher', 'presets', self.preset_domain)
+        os.makedirs(presetdir, exist_ok=True)
+        presetfile = os.path.join(presetdir, f'{code}.json')
+        with open(presetfile, 'w') as handle:
+            json.dump({
+                'name': preset_name,
+                'fields': contents,
+            }, handle)
 
     def set_class(self, widget, classname, state):
         if state:
