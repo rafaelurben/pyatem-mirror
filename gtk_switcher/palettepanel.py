@@ -207,8 +207,8 @@ class PalettePanel(Gtk.Overlay):
 
         code = str(uuid.uuid4())
         self._presets[code] = contents
-        mi = Gio.MenuItem.new(preset_name, "app.recallpreset")
-        mi.set_detailed_action(f"app.recallpreset(('{self.preset_domain}', '{code}'))")
+        mi = Gio.MenuItem.new(preset_name, f"{self._action_group}.recallpreset")
+        mi.set_detailed_action(f"{self._action_group}.recallpreset(('{self.preset_domain}', '{code}'))")
         self._preset_submenu.append_item(mi)
 
         xdg_config_home = os.path.expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config'))

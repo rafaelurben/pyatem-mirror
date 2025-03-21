@@ -14,7 +14,10 @@ class DownstreamKeyerPanel(PalettePanel):
         self.name = _("Downstream keyer {}").format(index + 1)
         self.index = index
 
-        super().__init__(self.name, connection)
+        super().__init__(self.name, connection, preset_domain="dsk", preset_override=[self.index], preset_fields=[
+            'dkey-properties-base',
+            'dkey-properties'
+        ])
 
         self.adj_clip = Gtk.Adjustment(upper=1000, step_increment=1, page_increment=10)
         self.adj_gain = Gtk.Adjustment(upper=1000, step_increment=1, page_increment=10)
