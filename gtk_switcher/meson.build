@@ -61,6 +61,7 @@ switcher_sources = [
     'palettepanel.py',
     'panel_mediaplayer.py',
     'panel_downstreamkeyer.py',
+    'panel_color.py',
 ]
 
 install_data(switcher_sources, install_dir: moduledir)

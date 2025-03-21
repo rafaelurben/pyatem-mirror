@@ -17,17 +17,7 @@ class MediaPlayerPanel(PalettePanel):
         self.name = _("Media Player {}").format(index + 1)
         super().__init__(self.name, connection)
 
-        dropdown = Gtk.ComboBox.new_with_model(self.model_media)
-        dropdown.set_entry_text_column(1)
-        dropdown.set_id_column(0)
-        self.dropdown = dropdown
-
-        dropdown.connect('changed', self.on_mediaplayer_change)
-        self.add_control(_("Media"), dropdown)
-
-        renderer = Gtk.CellRendererText()
-        dropdown.pack_start(renderer, True)
-        dropdown.add_attribute(renderer, "text", 1)
+        self.dropdown = self.add_control_dropdown(_("Media"), self.model_media, handler=self.on_mediaplayer_change)
 
         self.show_all()
 
@@ -39,15 +29,11 @@ class MediaPlayerPanel(PalettePanel):
         if data.index != self.index:
             return
 
-        self.model_changing = True
-        if data.source_type == 1:
-            self.dropdown.set_active_id(str(data.slot))
-        self.model_changing = False
+        with self.model:
+            if data.source_type == 1:
+                self.dropdown.set_active_id(str(data.slot))
 
-    def on_mediaplayer_change(self, widget, *args):
-        if self.model_changing:
-            return
-
+    def on_mediaplayer_change(self, widget):
         index = widget.get_active_id()
         if index == "":
             return
