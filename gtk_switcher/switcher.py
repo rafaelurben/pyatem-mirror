@@ -532,14 +532,13 @@ class SwitcherPage:
     @field('dkey-properties')
     def on_dsk_change(self, data):
         self.me[0].set_dsk(data)
-        if data.index in self.dsks:
-            top = 9000 - data.top
-            bottom = data.bottom + 9000
-            left = data.left + 16000
-            right = 16000 - data.right
+        top = 9000 - data.top
+        bottom = data.bottom + 9000
+        left = data.left + 16000
+        right = 16000 - data.right
 
-            region = self.layout[0].get(LayoutView.LAYER_DSK, data.index)
-            region.set_mask(top, bottom, left, right)
+        region = self.layout[0].get(LayoutView.LAYER_DSK, data.index)
+        region.set_mask(top, bottom, left, right)
 
     @field('dkey-state')
     def on_dsk_state_change(self, data):
