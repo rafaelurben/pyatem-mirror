@@ -7,6 +7,7 @@ import uuid
 
 from gi.repository import Gtk, GObject, Gdk, GLib, Gio
 import pyatem.field as fieldmodule
+from gtk_switcher.adjustmententry import AdjustmentEntry
 from gtk_switcher.presetwindow import PresetWindow
 
 from pyatem.protocol import AtemProtocol
@@ -232,12 +233,17 @@ class PalettePanel(Gtk.Overlay):
         self.grid.attach(widget, 0, self._row, 2, 1)
         self._row += 1
 
-    def add_control(self, name, widget=None):
+    def add_control(self, name, widget=None, widget2=None):
         label = Gtk.Label(name, xalign=1.0)
         label.get_style_context().add_class('dim-label')
         self.grid.attach(label, 0, self._row, 1, 1)
+        width = 2
+        if widget2 is not None:
+            width = 1
         if widget is not None:
-            self.grid.attach(widget, 1, self._row, 1, 1)
+            self.grid.attach(widget, 1, self._row, width, 1)
+        if widget2 is not None:
+            self.grid.attach(widget2, 2, self._row, width, 1)
         self._row += 1
 
     def add_control_dropdown(self, name, model, handler=None):
@@ -280,6 +286,40 @@ class PalettePanel(Gtk.Overlay):
                 if not self.slider_held:
                     return
                 handler(*args, **kwargs)
+
+            adjustment.connect('value-changed', wrapper)
+
+        return widget
+
+    def add_control_slider_box(self, name, adjustment: Gtk.Adjustment, handler=None, handler_args=None,
+                               display_min=None,
+                               display_max=None):
+        widget = Gtk.Scale()
+        widget.set_draw_value(False)
+        widget.set_adjustment(adjustment)
+        widget.connect('button-press-event', self._on_slider_held)
+        widget.connect('button-release-event', self._on_slider_released)
+        widget.set_hexpand(True)
+
+        if display_min is None:
+            display_min = adjustment.get_lower()
+        if display_max is None:
+            display_max = adjustment.get_upper()
+
+        box = AdjustmentEntry(adjustment, display_min, display_max)
+        box.set_size_request(24, 24)
+        box.set_hexpand(False)
+        box.set_halign(Gtk.Align.END)
+        box.set_width_chars(6)
+
+        self.add_control(name, widget, box)
+        if handler_args is None:
+            handler_args = []
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if not self.slider_held:
+                    return
+                handler(*args, *handler_args, **kwargs)
 
             adjustment.connect('value-changed', wrapper)
 
