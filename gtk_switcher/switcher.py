@@ -10,6 +10,7 @@ from gtk_switcher.decorators import field
 from gtk_switcher.layout import LayoutView
 from gtk_switcher.panel_color import ColorPanel
 from gtk_switcher.panel_mediaplayer import MediaPlayerPanel
+from gtk_switcher.panel_supersource import SupersourcePanel
 from pyatem.command import CutCommand, AutoCommand, FadeToBlackCommand, TransitionSettingsCommand, WipeSettingsCommand, \
     TransitionPositionCommand, TransitionPreviewCommand, ColorGeneratorCommand, MixSettingsCommand, DipSettingsCommand, \
     DveSettingsCommand, AudioMasterPropertiesCommand, FairlightMasterPropertiesCommand, DkeyRateCommand, \
@@ -179,15 +180,12 @@ class SwitcherPage:
         self.model_key = builder.get_object('model_key')
         self.model_aux = builder.get_object('model_aux')
         self.model_disks = builder.get_object('model_disks')
+        self.model_supersource_box = Gtk.ListStore()
+        self.model_supersource_box.set_column_types([str, str])
+        self.model_supersource_art = Gtk.ListStore()
+        self.model_supersource_art.set_column_types([str, str])
         self.model_changing = False
         self.slider_held = False
-
-    def switcher_build(self):
-        colorpanel = ColorPanel(self.connection.mixer)
-        colorpanel.window = self.window
-        colorpanel.application = self.application
-        self.apply_css(colorpanel, self.provider)
-        self.palette_top.add(colorpanel)
 
     def add_mixeffect(self):
         from gtk_switcher.mixeffect import MixEffectBlock
@@ -552,6 +550,13 @@ class SwitcherPage:
         for i in range(0, data.me_units - len(self.me)):
             self.add_mixeffect()
 
+        # Color generators
+        colorpanel = ColorPanel(self.connection.mixer)
+        colorpanel.window = self.window
+        colorpanel.application = self.application
+        self.apply_css(colorpanel, self.provider)
+        self.palette_top.add(colorpanel)
+
         # Downstream keyer count, only available on M/E 1
         self.me[0].set_topology(data)
         self.apply_css(self.me[0], self.provider)
@@ -577,6 +582,14 @@ class SwitcherPage:
             self.switcher_mediaplayers.add(panel)
         self.media_create_mediaplayers(data.mediaplayers)
         self.switcher_mediaplayers.show_all()
+
+        # Supersource
+        for i in range(0, data.supersources):
+            sspanel = SupersourcePanel(self.connection.mixer, i, self.model_supersource_box, self.model_supersource_art)
+            sspanel.window = self.window
+            sspanel.application = self.application
+            self.apply_css(sspanel, self.provider)
+            self.palette_top.add(sspanel)
 
     def on_dsk_tie_clicked(self, widget, index, dsk, enabled):
         cmd = DkeyTieCommand(index=dsk, tie=enabled)
@@ -947,6 +960,11 @@ class SwitcherPage:
 
             if i.available_aux:
                 self.model_aux.append([str(i.index), i.name])
+
+            if i.available_supersource_box:
+                self.model_supersource_box.append([str(i.index), i.name])
+            if i.available_supersource_art:
+                self.model_supersource_art.append([str(i.index), i.name])
 
             if i.port_type == InputPropertiesField.PORT_AUX_OUTPUT:
                 self.routing.add_output(i)

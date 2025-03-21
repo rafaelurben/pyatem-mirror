@@ -236,8 +236,6 @@ class AtemWindow(SwitcherPage, MediaPage, AudioPage, CameraPage):
 
         self.window.add_accel_group(accel)
 
-        SwitcherPage.switcher_build(self)
-
         GLib.timeout_add_seconds(1, self.on_clock)
 
         Gtk.main()

@@ -26,6 +26,155 @@ class EventGate:
         self.ref.model_changing = False
 
 
+class PaletteGroup:
+    def __init__(self, panel):
+        self.panel = panel
+        self.stack: Gtk.Stack = None
+        self.grid = None
+        self.name = None
+        self.title = None
+        self.controls = []
+        self._row = 0
+
+    def add_page(self, name, title):
+        if self.stack is None:
+            raise ValueError("This is not a toplevel group")
+        grid = Gtk.Grid()
+        grid.set_column_spacing(12)
+        grid.set_row_spacing(12)
+        grid.set_margin_top(12)
+        grid.set_margin_bottom(12)
+        grid.set_margin_start(12)
+        grid.set_margin_end(12)
+
+        res = PaletteGroup(self.panel)
+        res.grid = grid
+        res.name = name
+        res.title = title
+        self.stack.add_titled(grid, name, title)
+        return res
+
+    def add_separator(self):
+        widget = Gtk.Separator()
+        self.grid.attach(widget, 0, self._row, 2, 1)
+        self._row += 1
+
+    def add_tabs(self, panel):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.grid.attach(box, 0, self._row, 3, 1)
+        self._row += 1
+        stack = Gtk.Stack()
+        switcher = Gtk.StackSwitcher()
+        switcher.get_style_context().add_class("less-padding")
+        box.pack_start(switcher, True, True, 0)
+        box.pack_start(stack, True, True, 0)
+
+        switcher.set_stack(stack)
+
+        res = PaletteGroup(panel)
+        res.stack = stack
+        return res
+
+    def add_control(self, name, widget=None, widget2=None):
+        label = Gtk.Label(name, xalign=1.0)
+        label.get_style_context().add_class('dim-label')
+        self.grid.attach(label, 0, self._row, 1, 1)
+        width = 2
+        if widget2 is not None:
+            width = 1
+        if widget is not None:
+            self.grid.attach(widget, 1, self._row, width, 1)
+        if widget2 is not None:
+            self.grid.attach(widget2, 2, self._row, width, 1)
+        self._row += 1
+
+    def add_control_dropdown(self, name, model, handler=None, handler_args=None):
+        widget = Gtk.ComboBox.new_with_model(model)
+        widget.set_entry_text_column(1)
+        widget.set_id_column(0)
+        self.add_control(name, widget)
+        renderer = Gtk.CellRendererText()
+        widget.pack_start(renderer, True)
+        widget.add_attribute(renderer, "text", 1)
+        if handler_args is None:
+            handler_args = []
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if self.panel.model_changing:
+                    return
+                handler(*args, *handler_args, **kwargs)
+
+            widget.connect('changed', wrapper)
+        return widget
+
+    def add_control_toggle(self, name, label, handler=None, handler_args=None):
+        # lbl = Gtk.Label(label=label)
+        widget = Gtk.Button(label)
+        # widget.add(lbl)
+        widget.set_size_request(48, 48)
+        widget.get_style_context().add_class('bmdbtn')
+        self.add_control(name, widget)
+        if handler_args is None:
+            handler_args = []
+
+        def wrapper(*args, **kwargs):
+            handler(*args, *handler_args, **kwargs)
+
+        if handler is not None:
+            widget.connect('clicked', wrapper)
+        return widget
+
+    def add_control_slider(self, name, adjustment: Gtk.Adjustment, handler=None):
+        widget = Gtk.Scale()
+        widget.set_draw_value(False)
+        widget.set_adjustment(adjustment)
+        widget.connect('button-press-event', self.panel._on_slider_held)
+        widget.connect('button-release-event', self.panel._on_slider_released)
+        self.add_control(name, widget)
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if not self.panel.slider_held:
+                    return
+                handler(*args, **kwargs)
+
+            adjustment.connect('value-changed', wrapper)
+
+        return widget
+
+    def add_control_slider_box(self, name, adjustment: Gtk.Adjustment, handler=None, handler_args=None,
+                               display_min=None, display_max=None):
+        widget = Gtk.Scale()
+        widget.set_draw_value(False)
+        widget.set_adjustment(adjustment)
+        widget.connect('button-press-event', self.panel._on_slider_held)
+        widget.connect('button-release-event', self.panel._on_slider_released)
+        widget.set_hexpand(True)
+
+        if display_min is None:
+            display_min = adjustment.get_lower()
+        if display_max is None:
+            display_max = adjustment.get_upper()
+
+        box = AdjustmentEntry(adjustment, display_min, display_max)
+        box.set_size_request(24, 24)
+        box.set_hexpand(False)
+        box.set_halign(Gtk.Align.END)
+        box.set_width_chars(6)
+
+        self.add_control(name, widget, box)
+        if handler_args is None:
+            handler_args = []
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if not self.panel.slider_held:
+                    return
+                handler(*args, *handler_args, **kwargs)
+
+            adjustment.connect('value-changed', wrapper)
+
+        return widget
+
+
 class PalettePanel(Gtk.Overlay):
     __gtype_name__ = 'PalettePanel'
 
@@ -41,6 +190,7 @@ class PalettePanel(Gtk.Overlay):
         self.slider_held = False
 
         self._row = 0
+        self._toplevel = PaletteGroup(self)
 
         super(Gtk.Overlay, self).__init__()
 
@@ -108,6 +258,7 @@ class PalettePanel(Gtk.Overlay):
         self.grid.set_margin_start(12)
         self.grid.set_margin_end(12)
         self.frame.add(self.grid)
+        self._toplevel.grid = self.grid
 
         self.show_all()
 
@@ -139,7 +290,12 @@ class PalettePanel(Gtk.Overlay):
                 elif len(part) == 2:
                     if part[1] == '*':
                         for f in self.connection.mixerstate[part[0]]:
-                            values.append(self.connection.mixerstate[part[0]][f])
+                            state = self.connection.mixerstate[part[0]][f]
+                            if isinstance(state, dict):
+                                for s in state:
+                                    values.append(state[s])
+                            else:
+                                values.append(state)
                     else:
                         values.append(self.connection.mixerstate[part[0]][int(part[1])])
                 for fun in callbacks[selector]:
@@ -228,102 +384,28 @@ class PalettePanel(Gtk.Overlay):
         else:
             widget.get_style_context().remove_class(classname)
 
-    def add_separator(self):
-        widget = Gtk.Separator()
-        self.grid.attach(widget, 0, self._row, 2, 1)
-        self._row += 1
+    def add_control(self, name, widget1=None, widget2=None):
+        return self._toplevel.add_control(name, widget1, widget2)
 
-    def add_control(self, name, widget=None, widget2=None):
-        label = Gtk.Label(name, xalign=1.0)
-        label.get_style_context().add_class('dim-label')
-        self.grid.attach(label, 0, self._row, 1, 1)
-        width = 2
-        if widget2 is not None:
-            width = 1
-        if widget is not None:
-            self.grid.attach(widget, 1, self._row, width, 1)
-        if widget2 is not None:
-            self.grid.attach(widget2, 2, self._row, width, 1)
-        self._row += 1
+    def add_tabs(self):
+        return self._toplevel.add_tabs(self)
+
+    def add_separator(self):
+        return self._toplevel.add_separator()
 
     def add_control_dropdown(self, name, model, handler=None):
-        widget = Gtk.ComboBox.new_with_model(model)
-        widget.set_entry_text_column(1)
-        widget.set_id_column(0)
-        self.add_control(name, widget)
-        renderer = Gtk.CellRendererText()
-        widget.pack_start(renderer, True)
-        widget.add_attribute(renderer, "text", 1)
-        if handler is not None:
-            def wrapper(*args, **kwargs):
-                if self.model_changing:
-                    return
-                handler(*args, **kwargs)
+        return self._toplevel.add_control_dropdown(name, model, handler=handler)
 
-            widget.connect('changed', wrapper)
-        return widget
-
-    def add_control_toggle(self, name, label, handler=None):
-        # lbl = Gtk.Label(label=label)
-        widget = Gtk.Button(label)
-        # widget.add(lbl)
-        widget.set_size_request(48, 48)
-        widget.get_style_context().add_class('bmdbtn')
-        self.add_control(name, widget)
-        if handler is not None:
-            widget.connect('clicked', handler)
-        return widget
+    def add_control_toggle(self, name, label, handler=None, handler_args=None):
+        return self._toplevel.add_control_toggle(name, label, handler=handler)
 
     def add_control_slider(self, name, adjustment: Gtk.Adjustment, handler=None):
-        widget = Gtk.Scale()
-        widget.set_draw_value(False)
-        widget.set_adjustment(adjustment)
-        widget.connect('button-press-event', self._on_slider_held)
-        widget.connect('button-release-event', self._on_slider_released)
-        self.add_control(name, widget)
-        if handler is not None:
-            def wrapper(*args, **kwargs):
-                if not self.slider_held:
-                    return
-                handler(*args, **kwargs)
-
-            adjustment.connect('value-changed', wrapper)
-
-        return widget
+        return self._toplevel.add_control_slider(name, adjustment, handler=handler)
 
     def add_control_slider_box(self, name, adjustment: Gtk.Adjustment, handler=None, handler_args=None,
-                               display_min=None,
-                               display_max=None):
-        widget = Gtk.Scale()
-        widget.set_draw_value(False)
-        widget.set_adjustment(adjustment)
-        widget.connect('button-press-event', self._on_slider_held)
-        widget.connect('button-release-event', self._on_slider_released)
-        widget.set_hexpand(True)
-
-        if display_min is None:
-            display_min = adjustment.get_lower()
-        if display_max is None:
-            display_max = adjustment.get_upper()
-
-        box = AdjustmentEntry(adjustment, display_min, display_max)
-        box.set_size_request(24, 24)
-        box.set_hexpand(False)
-        box.set_halign(Gtk.Align.END)
-        box.set_width_chars(6)
-
-        self.add_control(name, widget, box)
-        if handler_args is None:
-            handler_args = []
-        if handler is not None:
-            def wrapper(*args, **kwargs):
-                if not self.slider_held:
-                    return
-                handler(*args, *handler_args, **kwargs)
-
-            adjustment.connect('value-changed', wrapper)
-
-        return widget
+                               display_min=None, display_max=None):
+        return self._toplevel.add_control_slider_box(name, adjustment, handler=handler, handler_args=handler_args,
+                                                     display_min=display_min, display_max=display_max)
 
     def run(self, cmd):
         """ Dispatch CMD to active connection """
