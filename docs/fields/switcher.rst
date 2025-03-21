@@ -110,3 +110,8 @@ Fade to black
 .. autoclass:: pyatem.field.FadeToBlackField
    :members:
 
+SuperSource
+-----------
+
+.. autoclass:: pyatem.field.SupersourceBoxPropertiesField
+   :members:
