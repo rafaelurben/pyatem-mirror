@@ -533,8 +533,6 @@ class SwitcherPage:
     def on_dsk_change(self, data):
         self.me[0].set_dsk(data)
         if data.index in self.dsks:
-            self.dsks[data.index].on_key_properties_change(data)
-
             top = 9000 - data.top
             bottom = data.bottom + 9000
             left = data.left + 16000
@@ -588,21 +586,14 @@ class SwitcherPage:
         self.me[0].set_topology(data)
         self.apply_css(self.me[0], self.provider)
 
-        from gtk_switcher.downstreamkey import DownstreamKeyer
+        from gtk_switcher.panel_downstreamkeyer import DownstreamKeyerPanel
         for widget in self.downstream_keyers:
             self.downstream_keyers.remove(widget)
 
         for i in range(0, data.downstream_keyers):
-            label = _("Downstream keyer {}").format(i + 1)
-            dsk = DownstreamKeyer(index=i, connection=self.connection)
-            exp = self.make_preset_expander(label, f"dsk:{dsk.index}", dsk)
-
-            self.dsks[dsk.index] = dsk
-            self.has_models.append(dsk)
-            self.apply_css(dsk, self.provider)
-            dsk.set_fill_model(self.model_me1_fill)
-            dsk.set_key_model(self.model_key)
-            self.downstream_keyers.pack_start(exp, False, True, 0)
+            panel = DownstreamKeyerPanel(self.connection.mixer, i, self.model_me1_fill, self.model_key)
+            self.apply_css(panel, self.provider)
+            self.downstream_keyers.pack_start(panel, False, True, 0)
 
             # Add the DSK to the layout editor of M/E 1
             region = self.layout[0].get(LayoutView.LAYER_DSK, i)
@@ -800,13 +791,6 @@ class SwitcherPage:
             self.log_sw.warning("Got preview input change for non-existing M/E {}".format(data.index + 1))
             return
         self.me[data.index].preview_input_change(data)
-
-    @field('dkey-properties-base')
-    def on_dkey_properties_base_change(self, data):
-        if data.index not in self.dsks:
-            self.log_sw.warning("Got dkey-properties-base for non-existant keyer {}".format(data.index))
-            return
-        self.dsks[data.index].on_key_properties_base_change(data)
 
     def on_me_program_changed(self, widget, index, source):
         cmd = ProgramInputCommand(index=index, source=source)

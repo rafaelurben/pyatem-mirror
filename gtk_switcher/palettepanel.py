@@ -14,6 +14,17 @@ from pyatem.protocol import AtemProtocol
 _palette_field = {}
 
 
+class EventGate:
+    def __init__(self, reference):
+        self.ref = reference
+
+    def __enter__(self):
+        self.ref.model_changing = True
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.ref.model_changing = False
+
+
 class PalettePanel(Gtk.Overlay):
     __gtype_name__ = 'PalettePanel'
 
@@ -25,6 +36,7 @@ class PalettePanel(Gtk.Overlay):
         self.application = None
 
         self.model_changing = False
+        self.model = EventGate(self)
         self.slider_held = False
 
         self._row = 0
@@ -215,6 +227,11 @@ class PalettePanel(Gtk.Overlay):
         else:
             widget.get_style_context().remove_class(classname)
 
+    def add_separator(self):
+        widget = Gtk.Separator()
+        self.grid.attach(widget, 0, self._row, 2, 1)
+        self._row += 1
+
     def add_control(self, name, widget=None):
         label = Gtk.Label(name, xalign=1.0)
         label.get_style_context().add_class('dim-label')
@@ -223,9 +240,60 @@ class PalettePanel(Gtk.Overlay):
             self.grid.attach(widget, 1, self._row, 1, 1)
         self._row += 1
 
+    def add_control_dropdown(self, name, model, handler=None):
+        widget = Gtk.ComboBox.new_with_model(model)
+        widget.set_entry_text_column(1)
+        widget.set_id_column(0)
+        self.add_control(name, widget)
+        renderer = Gtk.CellRendererText()
+        widget.pack_start(renderer, True)
+        widget.add_attribute(renderer, "text", 1)
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if self.model_changing:
+                    return
+                handler(*args, **kwargs)
+
+            widget.connect('changed', wrapper)
+        return widget
+
+    def add_control_toggle(self, name, label, handler=None):
+        # lbl = Gtk.Label(label=label)
+        widget = Gtk.Button(label)
+        # widget.add(lbl)
+        widget.set_size_request(48, 48)
+        widget.get_style_context().add_class('bmdbtn')
+        self.add_control(name, widget)
+        if handler is not None:
+            widget.connect('clicked', handler)
+        return widget
+
+    def add_control_slider(self, name, adjustment: Gtk.Adjustment, handler=None):
+        widget = Gtk.Scale()
+        widget.set_draw_value(False)
+        widget.set_adjustment(adjustment)
+        widget.connect('button-press-event', self._on_slider_held)
+        widget.connect('button-release-event', self._on_slider_released)
+        self.add_control(name, widget)
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if not self.slider_held:
+                    return
+                handler(*args, **kwargs)
+
+            adjustment.connect('value-changed', wrapper)
+
+        return widget
+
     def run(self, cmd):
         """ Dispatch CMD to active connection """
         self.connection.send_commands([cmd])
+
+    def _on_slider_held(self, *args):
+        self.slider_held = True
+
+    def _on_slider_released(self, *args):
+        self.slider_held = False
 
     @classmethod
     def event(cls, name):

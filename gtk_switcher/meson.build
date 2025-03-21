@@ -46,7 +46,6 @@ switcher_sources = [
     'decorators.py',
     'adjustmententry.py',
     'dial.py',
-    'downstreamkey.py',
     'gtklogadjustment.py',
     'macroeditor.py',
     'stream_data.py',
@@ -61,6 +60,7 @@ switcher_sources = [
     'routing.py',
     'palettepanel.py',
     'panel_mediaplayer.py',
+    'panel_downstreamkeyer.py',
 ]
 
 install_data(switcher_sources, install_dir: moduledir)

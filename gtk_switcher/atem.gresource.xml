@@ -7,7 +7,6 @@
     <file>ui/mixeffect.glade</file>
     <file>ui/mixeffect-aux.glade</file>
     <file>ui/upstream-keyer.glade</file>
-    <file>ui/downstream-keyer.glade</file>
     <file>ui/preferences.glade</file>
     <file>ui/macro-editor.glade</file>
     <file>ui/eq.glade</file>
