@@ -15,14 +15,10 @@ class ColorPanel(PalettePanel):
 
         super().__init__(self.name, connection, preset_domain="colors", preset_fields=['color-generator'])
 
-        self.colors = {}
-        for c in range(2):
-            widget = Gtk.ColorButton()
-            widget.index = c
-            widget.connect('color-set', self.on_color_set)
-            self.colors[c] = widget
-            self.add_control(_("Color {}").format(c + 1), widget)
-
+        self.colors = [
+            self.add_control_color(_("Color {}").format(1), handler=self.on_color_set, handler_args=[0]),
+            self.add_control_color(_("Color {}").format(2), handler=self.on_color_set, handler_args=[1]),
+        ]
         self.show_all()
 
     def __repr__(self):
@@ -38,7 +34,7 @@ class ColorPanel(PalettePanel):
         color.alpha = 1.0
         self.colors[data.index].set_rgba(color)
 
-    def on_color_set(self, widget):
+    def on_color_set(self, widget, index):
         color = widget.get_rgba()
-        cmd = ColorGeneratorCommand.from_rgb(index=widget.index, red=color.red, green=color.green, blue=color.blue)
+        cmd = ColorGeneratorCommand.from_rgb(index=index, red=color.red, green=color.green, blue=color.blue)
         self.run(cmd)

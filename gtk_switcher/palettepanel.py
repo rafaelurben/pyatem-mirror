@@ -119,6 +119,22 @@ class PaletteGroup:
             widget.connect('changed', wrapper)
         return widget
 
+    def add_control_color(self, name, handler=None, handler_args=None):
+        if handler_args is None:
+            handler_args = []
+
+        widget = Gtk.ColorButton()
+        self.add_control(name, widget)
+        if handler is not None:
+            def wrapper(*args, **kwargs):
+                if self.panel.model_changing:
+                    return
+                handler(*args, *handler_args, **kwargs)
+
+            widget.connect('color-set', wrapper)
+
+        return widget
+
     def add_control_toggle(self, name, label, handler=None, handler_args=None):
         # lbl = Gtk.Label(label=label)
         widget = Gtk.Button(label)
@@ -441,7 +457,10 @@ class PalettePanel(Gtk.Overlay):
         return self._toplevel.add_control_dropdown(name, model, handler=handler)
 
     def add_control_toggle(self, name, label, handler=None, handler_args=None):
-        return self._toplevel.add_control_toggle(name, label, handler=handler)
+        return self._toplevel.add_control_toggle(name, label, handler=handler, handler_args=handler_args)
+
+    def add_control_color(self, name, handler=None, handler_args=None):
+        return self._toplevel.add_control_color(name, handler=handler, handler_args=handler_args)
 
     def add_control_slider(self, name, adjustment: Gtk.Adjustment, handler=None):
         return self._toplevel.add_control_slider(name, adjustment, handler=handler)
