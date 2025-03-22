@@ -15,7 +15,8 @@ class SupersourcePanel(PalettePanel):
         self.name = _("SuperSource {}".format(index + 1))
         self.index = index
 
-        super().__init__(self.name, connection, preset_domain="supersource", preset_fields=['color-generator'])
+        super().__init__(self.name, connection, preset_domain="supersource",
+                         preset_fields=['supersource-box-properties'], preset_override=[self.index])
 
         self.ctrl = {}
 

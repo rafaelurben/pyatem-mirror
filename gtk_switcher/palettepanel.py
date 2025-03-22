@@ -338,20 +338,31 @@ class PalettePanel(Gtk.Overlay):
                 return
         self.connection.send_commands(cmds)
 
+    def _filter_preset_state(self, field, state, override):
+        result = []
+        if override is None:
+            override = []
+        if isinstance(state, dict):
+            if len(override) > 0:
+                next_override = override[1:]
+            else:
+                next_override = []
+            for key in state:
+                if len(override) > 0 and override[0] != key:
+                    continue
+                result.extend(self._filter_preset_state(field, state[key], next_override))
+        else:
+            serialized = state.serialize()
+            if serialized is not None:
+                serialized['_name'] = field
+                result.append(serialized)
+        return result
+
     def _on_save_preset(self, action, parameters):
         contents = []
         for field in self.preset_fields:
             ms = self.connection.mixerstate[field]
-            if isinstance(ms, dict):
-                for key in ms:
-                    if self.preset_override is not None and len(self.preset_override) == 1:
-                        if key != int(self.preset_override[0]):
-                            continue
-                    sf = ms[key]
-                    s = sf.serialize()
-                    if s is not None:
-                        s['_name'] = field
-                        contents.append(s)
+            contents.extend(self._filter_preset_state(field, ms, self.preset_override))
 
         dialog = PresetWindow(self.window, self.application)
         response = dialog.run()

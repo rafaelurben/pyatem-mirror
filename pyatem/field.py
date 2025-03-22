@@ -5,7 +5,7 @@ import struct
 import math
 
 from pyatem.command import ColorGeneratorCommand, DkeyTieCommand, DkeyRateCommand, DkeySetFillCommand, \
-    DkeySetKeyCommand, DkeyGainCommand, DkeyMaskCommand
+    DkeySetKeyCommand, DkeyGainCommand, DkeyMaskCommand, SupersourceBoxPropertiesCommand
 from pyatem.hexdump import hexdump
 
 
@@ -3558,3 +3558,28 @@ class SupersourceBoxPropertiesField(FieldBase):
                                                                                                       self.source,
                                                                                                       self.x, self.y,
                                                                                                       self.size)
+
+    def serialize(self):
+        return {
+            "index": self.index,
+            "box": self.box,
+            "enabled": self.enabled,
+            "source": self.source,
+            "x": self.x,
+            "y": self.y,
+            "size": self.size,
+            "masked": self.masked,
+            "top": self.mask_top,
+            "bottom": self.mask_bottom,
+            "left": self.mask_left,
+            "right": self.mask_right,
+        }
+
+    @classmethod
+    def restore(cls, data, instance_override=None):
+        if instance_override is not None:
+            data['index'] = instance_override[0]
+        return [SupersourceBoxPropertiesCommand(index=data['index'], box=data['box'], enabled=data['enabled'],
+                                                source=data['source'], x=data['x'], y=data['y'], size=data['size'],
+                                                masked=data['masked'], top=data['top'], bottom=data['bottom'],
+                                                left=data['left'], right=data['right'])]
