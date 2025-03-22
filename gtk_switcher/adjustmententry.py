@@ -17,8 +17,10 @@ class AdjustmentEntry(Gtk.Entry):
         self.updating_model = False
         self.display_min = display_min
         self.display_max = display_max
+        self.debounce = False
         self.set_adjustment(adjustment)
         self.get_style_context().add_class('adjustmententry')
+        self.display = 0
 
     def set_adjustment(self, adjustment):
         self.adjustment = adjustment
@@ -31,17 +33,25 @@ class AdjustmentEntry(Gtk.Entry):
     def _remap(self, value, old_min, old_max, new_min, new_max):
         return ((value - old_min) / (old_max - old_min)) * (new_max - new_min) + new_min
 
+    def _update(self, *args):
+        self.updating_model = True
+        text = "{:.2f}".format(self.display)
+        # Entry.set_text() segfaults GTK3 occasionally
+        self.set_text(text)
+        self.updating_model = False
+        self.debounce = False
+
     def adj_changed(self, *args):
         if hasattr(self.adjustment, 'get_value_log'):
             value = self.adjustment.get_value_log()
         else:
             value = self.adjustment.get_value()
-        display = self._remap(value, self.adjustment.get_lower(), self.adjustment.get_upper(), self.display_min,
-                              self.display_max)
+        self.display = self._remap(value, self.adjustment.get_lower(), self.adjustment.get_upper(), self.display_min,
+                                   self.display_max)
 
-        self.updating_model = True
-        self.set_text("{:.2f}".format(display))
-        self.updating_model = False
+        if not self.debounce:
+            self.debounce = True
+            GLib.timeout_add(500, self._update)
 
     def do_activate(self):
         if not isinstance(self, AdjustmentEntry):
