@@ -3111,10 +3111,94 @@ class TransferCompleteCommand(Command):
         return self._make_command('*XFC', data)
 
 
+class SupersourcePropertiesCommand(Command):
+    """
+    Implementation of the `CSSc` command.  This sets global options for a SuperSource element like the Art sources.
+
+    ====== ==== ====== ===========
+    Offset Size Type   Description
+    ====== ==== ====== ===========
+    0      1    u8     Mask
+    1      1    u8     SuperSource index
+    2      2    u16    Artwork fill source
+    4      2    u16    Artwork key source
+    6      1    u8     Artwork layer [0=background, 1=foreground]
+    7      1    bool   Premultiplied
+    8      2    u16    Keyer clip [0-1000]
+    10     2    u16    Keyer gain [0-1000]
+    12     1    bool   Keyer invert
+    13     3    ?      padding
+    ====== ==== ====== ===========
+
+    === ==========
+    Bit Mask value
+    === ==========
+    0   Fill source
+    1   Key source
+    2   Artwork layer
+    3   Premultiplied
+    4   Clip
+    5   Gain
+    6   Invert key
+    === ==========
+
+    """
+
+    def __init__(self, index, fill_source=None, key_source=None, layer=None, premultiplied=None, clip=None, gain=None,
+                 invert=None):
+        """
+        :param index: 0-indexed SuperSource number
+        :param fill_source: Artwork fill source
+        :param key_source: Artwork key source
+        :param layer: Whether the artwork is on the foreground or background
+        :param premultiplied: Use premultiplied alpha in the keyer
+        :param clip: Clipping value for the luma keyer
+        :param gain: Gain value for the luma keyer
+        :param invert: Invert the keyer result
+        """
+        self.index = index
+        self.fill = fill_source
+        self.key = key_source
+        self.layer = layer
+        self.premultiplied = premultiplied
+        self.clip = clip
+        self.gain = gain
+        self.invert = invert
+
+    def get_command(self):
+        mask = 0
+        if self.fill is not None:
+            mask |= 1 << 0
+        if self.key is not None:
+            mask |= 1 << 1
+        if self.layer is not None:
+            mask |= 1 << 2
+        if self.premultiplied is not None:
+            mask |= 1 << 3
+        if self.clip is not None:
+            mask |= 1 << 4
+        if self.gain is not None:
+            mask |= 1 << 5
+        if self.invert is not None:
+            mask |= 1 << 6
+
+        fill = self.fill or 0
+        key = self.key or 0
+        layer = self.layer or 0
+        premultiplied = self.premultiplied or False
+        clip = self.clip or 0
+        gain = self.gain or 0
+        invert = self.invert or False
+
+        data = struct.pack('>BBH HB? HH ?xxx', mask, self.index, fill, key, layer, premultiplied, clip, gain, invert)
+
+        return self._make_command('CSSc', data)
+
+
 class SupersourceBoxPropertiesCommand(Command):
     """
-    Implementation of the `CSBP` command.  This sets the state of the
-    colorpicker for the advanced chroma keyer.
+    Implementation of the `CSBP` command.  This sets the properties on a single box in the SuperSource element.
+    Every SuperSource will have four of these boxes to control.
 
     ====== ==== ====== ===========
     Offset Size Type   Description

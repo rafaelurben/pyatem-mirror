@@ -5,7 +5,7 @@ import struct
 import math
 
 from pyatem.command import ColorGeneratorCommand, DkeyTieCommand, DkeyRateCommand, DkeySetFillCommand, \
-    DkeySetKeyCommand, DkeyGainCommand, DkeyMaskCommand, SupersourceBoxPropertiesCommand
+    DkeySetKeyCommand, DkeyGainCommand, DkeyMaskCommand, SupersourceBoxPropertiesCommand, SupersourcePropertiesCommand
 from pyatem.hexdump import hexdump
 
 
@@ -3527,9 +3527,52 @@ class TransferCompleteField(FieldBase):
         return '<*transfer-complete: store={} slot={} upload={}>'.format(self.store, self.slot, self.upload)
 
 
+class SupersourcePropertiesField(FieldBase):
+    """
+    Data from the `SSBP`. The data for a SuperSource element.
+    """
+
+    CODE = "SSrc"
+
+    def __init__(self, raw):
+        self.raw = raw
+        field = struct.unpack('>BxH HB? HH ?xxx', raw)
+        self.index = field[0]
+        self.fill_source = field[1]
+        self.key_source = field[2]
+        self.layer = field[3]
+        self.premultiplied = field[4]
+        self.clip = field[5]
+        self.gain = field[6]
+        self.inverted = field[7]
+
+    def __repr__(self):
+        return f'<supersource-properties index={self.index} fill={self.fill_source} key={self.key_source}>'
+
+    def serialize(self):
+        return {
+            "index": self.index,
+            "fill": self.fill_source,
+            "key": self.key_source,
+            "layer": self.layer,
+            "premultiplied": self.premultiplied,
+            "clip": self.clip,
+            "gain": self.gain,
+            "inverted": self.inverted,
+        }
+
+    @classmethod
+    def restore(cls, data, instance_override=None):
+        if instance_override is not None:
+            data['index'] = instance_override[0]
+        return [SupersourcePropertiesCommand(index=data['index'], fill_source=data['fill'], key_source=data['key'],
+                                             layer=data['layer'], premultiplied=data['premultiplied'],
+                                             clip=data['clip'], gain=data['gain'], invert=data['inverted'])]
+
+
 class SupersourceBoxPropertiesField(FieldBase):
     """
-    Data from the `SSBP`. The data for a SuperSource box.
+    Data from the `SSBP`. The data for a single box in a SuperSource element.
     """
 
     CODE = "SSBP"

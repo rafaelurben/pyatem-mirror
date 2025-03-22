@@ -170,3 +170,14 @@ Fade to black
 .. autoclass:: pyatem.command.FadeToBlackConfigCommand
    :members:
    :special-members:
+
+SuperSource
+-----------
+
+.. autoclass:: pyatem.command.SupersourcePropertiesCommand
+   :members:
+   :special-members:
+
+.. autoclass:: pyatem.command.SupersourceBoxPropertiesCommand
+   :members:
+   :special-members:

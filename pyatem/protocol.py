@@ -173,6 +173,7 @@ class AtemProtocol:
         'multiviewer-safe-area': struct.Struct('>BB'),
         'camera-control-data-packet': struct.Struct('>BBB'),
         'supersource-box-properties': struct.Struct('>BB'),
+        'supersource-properties': struct.Struct('>B'),
     }
 
     def __init__(self, ip=None, port=9910, usb=None):

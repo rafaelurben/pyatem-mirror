@@ -3,8 +3,8 @@
 from gi.repository import Gtk, GObject, Gdk
 
 from gtk_switcher.palettepanel import PalettePanel
-from pyatem.command import SupersourceBoxPropertiesCommand
-from pyatem.field import SupersourceBoxPropertiesField
+from pyatem.command import SupersourceBoxPropertiesCommand, SupersourcePropertiesCommand
+from pyatem.field import SupersourceBoxPropertiesField, SupersourcePropertiesField
 
 
 class SupersourcePanel(PalettePanel):
@@ -16,7 +16,8 @@ class SupersourcePanel(PalettePanel):
         self.index = index
 
         super().__init__(self.name, connection, preset_domain="supersource",
-                         preset_fields=['supersource-box-properties'], preset_override=[self.index])
+                         preset_fields=['supersource-properties', 'supersource-box-properties'],
+                         preset_override=[self.index])
 
         self.ctrl = {}
 
@@ -61,10 +62,43 @@ class SupersourcePanel(PalettePanel):
                                                                display_min=0, display_max=32,
                                                                handler=self.on_box_pos, handler_args=[i, "right"])
 
+        art = tabs.add_page("art", _("Art"))
+        self.art_fill = art.add_control_dropdown(_("Source"), art_model, handler=self.on_art_source,
+                                                 handler_args=['fill_source'])
+        self.art_key = art.add_control_dropdown(_("Key"), art_model, handler=self.on_art_source,
+                                                handler_args=['key_source'])
+        self.layer = art.add_control_radio(_("Layer"), {
+            0: _("Background"),
+            1: _("Foreground"),
+        }, handler=self.on_layer)
+        art.add_separator()
+        self.adj_clip = Gtk.Adjustment(upper=1000, step_increment=1, page_increment=10)
+        self.adj_gain = Gtk.Adjustment(upper=1000, step_increment=1, page_increment=10)
+        self.premultiplied = art.add_control_toggle(_("Key"), _("Pre multiplied"), handler=self.on_premultiplied)
+        self.clip = art.add_control_slider(_("Clip"), self.adj_clip, handler=self.on_clip)
+        self.gain = art.add_control_slider(_("Gain"), self.adj_gain, handler=self.on_gain)
+        self.invert = art.add_control_toggle(_("Invert"), _("Invert"), handler=self.on_invert)
+
         self.show_all()
 
     def __repr__(self):
         return '<SupersourcePanel {}>'.format(self.panel_name)
+
+    @PalettePanel.event('change:supersource-properties:*')
+    def event_properties(self, data: SupersourcePropertiesField):
+        if data.index != self.index:
+            return
+        self.art_fill.set_active_id(str(data.fill_source))
+        self.art_key.set_active_id(str(data.key_source))
+        self.set_class(self.premultiplied, 'active', data.premultiplied)
+        self.set_class(self.invert, 'active', data.inverted)
+
+        self.layer.set_value(data.layer)
+
+        self.clip.set_sensitive(not data.premultiplied)
+        self.gain.set_sensitive(not data.premultiplied)
+        self.clip.set_value(data.clip)
+        self.gain.set_value(data.gain)
 
     @PalettePanel.event('change:supersource-box-properties:*')
     def event_boxproperties(self, data: SupersourceBoxPropertiesField):
@@ -97,3 +131,24 @@ class SupersourcePanel(PalettePanel):
     def on_box_pos(self, widget, box, prop):
         kwarg = {prop: int(widget.get_value())}
         self.run(SupersourceBoxPropertiesCommand(self.index, box, **kwarg))
+
+    def on_art_source(self, widget, prop):
+        kwarg = {prop: int(widget.get_active_id())}
+        self.run(SupersourcePropertiesCommand(self.index, **kwarg))
+
+    def on_premultiplied(self, widget):
+        state = widget.get_style_context().has_class('active')
+        self.run(SupersourcePropertiesCommand(index=self.index, premultiplied=not state))
+
+    def on_clip(self, widget):
+        self.run(SupersourcePropertiesCommand(index=self.index, clip=int(widget.get_value())))
+
+    def on_gain(self, widget):
+        self.run(SupersourcePropertiesCommand(index=self.index, gain=int(widget.get_value())))
+
+    def on_invert(self, widget):
+        state = widget.get_style_context().has_class('active')
+        self.run(SupersourcePropertiesCommand(index=self.index, invert=not state))
+
+    def on_layer(self, widget, value):
+        self.run(SupersourcePropertiesCommand(index=self.index, layer=value))

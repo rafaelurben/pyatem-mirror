@@ -113,5 +113,8 @@ Fade to black
 SuperSource
 -----------
 
+.. autoclass:: pyatem.field.SupersourcePropertiesField
+   :members:
+
 .. autoclass:: pyatem.field.SupersourceBoxPropertiesField
    :members:

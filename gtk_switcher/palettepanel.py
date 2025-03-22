@@ -26,6 +26,18 @@ class EventGate:
         self.ref.model_changing = False
 
 
+class RadioProxy:
+    def __init__(self, parent, radios):
+        self.parent = parent
+        self.radios = {}
+        for r in radios:
+            self.radios[r.value] = r
+
+    def set_value(self, value):
+        with self.parent.model:
+            self.radios[value].set_active(True)
+
+
 class PaletteGroup:
     def __init__(self, panel):
         self.panel = panel
@@ -174,6 +186,31 @@ class PaletteGroup:
 
         return widget
 
+    def add_control_radio(self, name, options, handler=None, handler_args=None):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+        if handler_args is None:
+            handler_args = []
+
+        def wrapper(*args, **kwargs):
+            if self.panel.model_changing:
+                return
+            handler(*args, args[0].value, *handler_args, **kwargs)
+
+        group = None
+        radios = []
+        for key in options:
+            rad = Gtk.RadioButton(label=options[key], group=group)
+            rad.value = key
+            if group is None:
+                group = rad
+            if handler is not None:
+                rad.connect("clicked", wrapper)
+            box.pack_start(rad, True, True, 0)
+            radios.append(rad)
+        self.add_control(name, box)
+        return RadioProxy(self.panel, radios)
+
 
 class PalettePanel(Gtk.Overlay):
     __gtype_name__ = 'PalettePanel'
@@ -276,6 +313,15 @@ class PalettePanel(Gtk.Overlay):
     def __repr__(self):
         return '<PalettePanel {}>'.format(self.panel_name)
 
+    def _init_flatten(self, state):
+        result = []
+        if isinstance(state, dict):
+            for key in state:
+                result.extend(self._init_flatten(state[key]))
+        else:
+            result.append(state)
+        return result
+
     def initialize(self):
         ptype = self.__class__.__name__
         if ptype in _palette_field:
@@ -284,20 +330,7 @@ class PalettePanel(Gtk.Overlay):
                 if not selector.startswith('change:'):
                     continue
                 part = selector.split(":")[1:]
-                values = []
-                if len(part) == 1:
-                    values = [self.connection.mixerstate[part[0]]]
-                elif len(part) == 2:
-                    if part[1] == '*':
-                        for f in self.connection.mixerstate[part[0]]:
-                            state = self.connection.mixerstate[part[0]][f]
-                            if isinstance(state, dict):
-                                for s in state:
-                                    values.append(state[s])
-                            else:
-                                values.append(state)
-                    else:
-                        values.append(self.connection.mixerstate[part[0]][int(part[1])])
+                values = self._init_flatten(self.connection.mixerstate[part[0]])
                 for fun in callbacks[selector]:
                     fn_ref = getattr(self, fun)
                     for v in values:
