@@ -9,6 +9,7 @@ a few parts since the skaarhoj documentation has been last updated.
    :maxdepth: 2
    :caption: Contents:
 
+   manual/overview
    udptransport
    usbtransport
    media
