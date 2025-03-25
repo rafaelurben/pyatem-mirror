@@ -67,3 +67,12 @@ Some devices also contain a SuperSource unit. This is a very simplified M/E unit
 removes all transition and most keying functionality. It only has a background and four DVE keyers to scale up to
 four sources into boxes. An example usage for this is showing a 4-channel split screen from multiple cameras or computer
 captures without taking up the upstream keyers of the main M/E unit.
+
+.. image:: ../images/ui-colors.png
+   :width: 600
+   :alt: ATEM components marked on the OpenSwitcher UI
+
+In the image above the components of the ATEM hardware are roughly marked on the UI of OpenSwitcher. It doesn't
+completely match up because several things are split up over multiple panels like the USK and DSK configuration.
+
+It does show though that most of the UI of the ATEM is taken up by the background control for the mix/effect unit.
