@@ -61,6 +61,7 @@ switcher_sources = [
     'palettepanel.py',
     'panel_mediaplayer.py',
     'panel_downstreamkeyer.py',
+    'panel_supersource.py',
     'panel_color.py',
 ]
 
