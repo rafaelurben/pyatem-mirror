@@ -3377,3 +3377,45 @@ class MacroActionCommand(Command):
     def get_command(self):
         data = struct.pack('>HBx', self.index, self.action)
         return self._make_command('MAct', data)
+
+
+class SaveStartupStateCommand(Command):
+    """
+    Implementation of the `SRsv` command.  This is equivalent to pressing the "Save startup state" button
+    in the official application.
+
+    ====== ==== ====== ===========
+    Offset Size Type   Description
+    ====== ==== ====== ===========
+    0      4    ?      padding?
+    ====== ==== ====== ===========
+
+    """
+
+    def __init__(self):
+        pass
+
+    def get_command(self):
+        data = struct.pack('>xxxx')
+        return self._make_command('SRsv', data)
+
+
+class ClearStartupStateCommand(Command):
+    """
+    Implementation of the `SRcl` command.  This is equivalent to pressing the "Clear startup state" button
+    in the official application.
+
+    ====== ==== ====== ===========
+    Offset Size Type   Description
+    ====== ==== ====== ===========
+    0      4    ?      padding?
+    ====== ==== ====== ===========
+
+    """
+
+    def __init__(self):
+        pass
+
+    def get_command(self):
+        data = struct.pack('>xxxx')
+        return self._make_command('SRcl', data)
