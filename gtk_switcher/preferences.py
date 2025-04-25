@@ -4,7 +4,8 @@ import json
 
 import gi
 
-from pyatem.command import MultiviewInputCommand, VideoModeCommand, AutoInputVideoModeCommand
+from pyatem.command import MultiviewInputCommand, VideoModeCommand, AutoInputVideoModeCommand, SaveStartupStateCommand, \
+    ClearStartupStateCommand
 from pyatem.field import InputPropertiesField
 
 gi.require_version('Gtk', '3.0')
@@ -381,3 +382,9 @@ class PreferencesWindow:
         hub.connect('deleted', self.on_videohub_deleted)
         self.videohubs.add(hub)
         self.videohubs.show_all()
+
+    def on_save_startup_state(self, widget):
+        self.connection.mixer.send_commands([SaveStartupStateCommand()])
+
+    def on_clear_startup_state(self, widget):
+        self.connection.mixer.send_commands([ClearStartupStateCommand()])
