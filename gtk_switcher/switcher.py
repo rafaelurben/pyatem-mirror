@@ -19,7 +19,7 @@ from pyatem.command import CutCommand, AutoCommand, FadeToBlackCommand, Transiti
     FadeToBlackConfigCommand, RecorderStatusCommand, AuxSourceCommand, StreamingServiceSetCommand, \
     RecordingSettingsSetCommand, StreamingStatusSetCommand, MediaplayerSelectCommand, StreamingAudioBitrateCommand, \
     MacroRecordCommand, MacroActionCommand
-from pyatem.field import TransitionSettingsField, InputPropertiesField, TopologyField
+from pyatem.field import TransitionSettingsField, InputPropertiesField, TopologyField, RecordingSettingsField
 import gtk_switcher.stream_data
 
 import gi
@@ -90,6 +90,7 @@ class SwitcherPage:
         self.stream_recorder_switch = builder.get_object('stream_recorder_switch')
         self.stream_recorder_clock = builder.get_object('stream_recorder_clock')
         self.stream_recorder_status = builder.get_object('stream_recorder_status')
+        self.stream_recorder_trigger_cameras = builder.get_object('stream_recorder_trigger_cameras')
         self.stream_recorder_disk = [None, None]
         self.stream_recorder_active = False
         self.stream_recorder_start_time = None
@@ -784,7 +785,7 @@ class SwitcherPage:
         self.connection.mixer.send_commands([cmd])
 
     @field('recording-settings')
-    def on_stream_recording_setting_change(self, data):
+    def on_stream_recording_setting_change(self, data: RecordingSettingsField):
         self.expander_stream_recorder.show()
         self.model_changing = True
         self.stream_recorder_filename.set_text(data.filename)
@@ -792,6 +793,7 @@ class SwitcherPage:
 
         self.stream_recorder_disk1.set_active_id(str(data.disk1))
         self.stream_recorder_disk2.set_active_id(str(data.disk2))
+        self.stream_recorder_trigger_cameras.set_active(data.record_in_cameras)
         self.on_update_recording_buttons()
         self.model_changing = False
 
@@ -893,6 +895,10 @@ class SwitcherPage:
 
     def on_stream_recorder_stop_clicked(self, widget, *args):
         cmd = RecorderStatusCommand(recording=False)
+        self.connection.mixer.send_commands([cmd])
+
+    def on_stream_recorder_trigger_cameras_clicked(self, widget, *args):
+        cmd = RecordingSettingsSetCommand(record_in_camera=widget.get_active())
         self.connection.mixer.send_commands([cmd])
 
     def on_aux_output_source_change(self, source):

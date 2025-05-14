@@ -156,6 +156,7 @@ class PaletteGroup:
         widget = Gtk.Scale()
         widget.set_draw_value(False)
         widget.set_adjustment(adjustment)
+        widget.set_hexpand(True)
         widget.connect('button-press-event', self.panel._on_slider_held)
         widget.connect('button-release-event', self.panel._on_slider_released)
         self.add_control(name, widget)
@@ -346,6 +347,8 @@ class PalettePanel(Gtk.Overlay):
                 if not selector.startswith('change:'):
                     continue
                 part = selector.split(":")[1:]
+                if part[0] not in self.connection.mixerstate:
+                    return False
                 values = self._init_flatten(self.connection.mixerstate[part[0]])
                 for fun in callbacks[selector]:
                     fn_ref = getattr(self, fun)

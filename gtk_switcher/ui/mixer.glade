@@ -2829,10 +2829,11 @@
                                                             <object class="GtkCheckButton" id="stream_recorder_trigger_cameras">
                                                             <property name="label" translatable="yes">Record in all cameras</property>
                                                             <property name="visible">True</property>
-                                                            <property name="sensitive">False</property>
+                                                            <property name="sensitive">True</property>
                                                             <property name="can-focus">True</property>
                                                             <property name="receives-default">False</property>
                                                             <property name="draw-indicator">True</property>
+                                                            <signal name="toggled" handler="on_stream_recorder_trigger_cameras_clicked" swapped="no"/>
                                                             </object>
                                                             <packing>
                                                             <property name="left-attach">1</property>
