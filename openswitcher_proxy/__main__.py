@@ -1,7 +1,11 @@
 import argparse
+import sys
 import time
 
-import toml
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 import logging
 
 from openswitcher_proxy.error import RecoverableError
@@ -23,7 +27,8 @@ nthreads = {}
 
 
 def run(config_path):
-    config = toml.load(config_path)
+    with open(config_path, 'rb') as handle:
+        config = tomllib.load(handle)
     logging.info('Loading config file ' + config_path)
     if 'hardware' in config:
         nthreads['hardware'] = {}

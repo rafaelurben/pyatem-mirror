@@ -11,7 +11,7 @@ setup(
     author='Martijn Braam',
     author_email='martijn@brixit.nl',
     description='Proxy for ATEM switchers',
-    requires=['pyatem', 'toml'],
+    requires=['pyatem', 'tomli >= 1.1.0 ; python_version < "3.11"'],
     extras_require={
         'midi': ['python-rtmidi'],
         'mqtt': ['paho-mqtt'],
