@@ -31,6 +31,19 @@
   <url type="bugtracker">https://todo.sr.ht/~martijnbraam/OpenAtem</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.13.0" date="2025-08-20">
+      <description>
+        <ul>
+          <li>Add support for the ATEM Mini Pro ISO and the ATEM 2 M/E Prod Studio 4k</li>
+          <li>Fix the mask-enable buttons for upstream keyers</li>
+          <li>Fix translations for the DSK panel</li>
+          <li>Implement preset loading and saving for downstream keyers</li>
+          <li>Implement mask controls for downstream keyers</li>
+          <li>Implement supersource presets</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="0.12.0" date="2024-07-24">
       <description>
         <ul>
