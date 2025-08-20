@@ -4,7 +4,7 @@ from setuptools import setup, Extension
 
 setup(
     name='pyatem',
-    version='0.12.0',
+    version='0.13.0',
     packages=['pyatem', 'pyatem.converters'],
     ext_modules=[Extension('pyatem.mediaconvert', ['pyatem/mediaconvertmodule.c'])],
     url='https://git.sr.ht/~martijnbraam/pyatem',

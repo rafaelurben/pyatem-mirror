@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='openswitcher-proxy',
-    version='0.12.3',
+    version='0.13.0',
     packages=['openswitcher_proxy'],
     url='https://git.sr.ht/~martijnbraam/pyatem',
     license='LGPL3',
